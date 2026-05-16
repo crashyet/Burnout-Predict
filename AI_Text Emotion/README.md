@@ -10,6 +10,13 @@ Output model berupa probabilitas untuk setiap kelas emosi, seperti `anger`, `fea
 
 ---
 
+### **Download Model**
+Karena ukuran model cukup besar, file `.keras` disimpan menggunakan Google Drive.
+
+Link Drive:
+https://drive.google.com/drive/folders/1gKXW6iX2OflXCUjn9y9Tgi4qhYJhlNnK?usp=sharing
+
+---
 ### **Alur Kerja Model**
 
 Secara umum, alur kerja model adalah sebagai berikut:
