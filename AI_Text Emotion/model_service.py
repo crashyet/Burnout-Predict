@@ -92,3 +92,13 @@ def predict_long_text(text):
         "top_2_emotions": top2,
         "all_probabilities": all_probabilities
     }
+
+
+if __name__ == "__main__":
+
+    user_text = input("Masukkan teks: ")
+
+    result = predict_long_text(user_text)
+
+    print("\nHasil Prediksi:")
+    print(result)
