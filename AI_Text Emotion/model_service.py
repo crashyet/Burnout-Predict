@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 import tensorflow as tf
+import re 
 from collections import Counter
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from attention_layer import AttentionLayer
@@ -32,6 +33,15 @@ def split_text(text, chunk_size=150, overlap=35):
 
     return chunks
 
+def clean_text(text):
+    text = str(text)
+    
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"(.)\1{4,}", r"\1\1\1", text)
+    
+    text = text.strip()
+    
+    return text
 
 def predict_long_text(text):
     if not text or not text.strip():
