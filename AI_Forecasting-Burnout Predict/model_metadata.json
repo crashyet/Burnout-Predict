@@ -1,0 +1,44 @@
+{
+  "model_name": "burnout_prediction_model",
+
+  "framework": "TensorFlow/Keras",
+
+  "model_type": "GRU + Attention Time Series Regression",
+
+  "model_file": "best_burnout_model.keras",
+
+  "service_file": "model_service.py",
+
+  "feature_scaler_file": "feature_scaler.pkl",
+
+  "target_scaler_file": "target_scaler.pkl",
+
+  "window_size": 7,
+
+  "input_shape": [7, 9],
+
+  "target": "burnout_score",
+
+  "prediction_type": "regression",
+
+  "features": [
+    "work_hours_per_day",
+    "sleep_hours",
+    "consecutive_overwork",
+    "sleep_work_ratio",
+    "burnout_rolling_mean_7",
+    "burnout_rolling_mean_14",
+    "burnout_rolling_std_7",
+    "work_rolling_mean_7",
+    "sleep_rolling_mean_7"
+  ],
+
+  "output": [
+    "behavior_prediction_score",
+    "questionnaire_score",
+    "final_burnout_score",
+    "final_burnout_level",
+    "difference",
+    "weighting_type"
+  ]
+}
