@@ -1,5 +1,5 @@
 require("dotenv").config();
-const createConnectionPool = require("@databases/mysql");
+const createConnectionPool = require("@databases/pg");
 
 const connectionString = process.env.DB_URL;
 
@@ -8,8 +8,10 @@ if (!connectionString) {
 }
 
 const db = createConnectionPool({
-  poolSize: 10,
   connectionString: connectionString,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 module.exports = db;
