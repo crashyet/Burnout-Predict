@@ -8,6 +8,10 @@ const assessmentRoutes = require("./src/routes/assessmentRoutes");
 const authMiddleware = require("./src/middleware/authMiddleware");
 const { successResponse } = require("./src/utils/response");
 
+const swaggerUi = require("swagger-ui-express");
+const swaggerBackend = require("./swagger-backend.json");
+const swaggerML = require("./swagger-ml.json");
+
 const app = express();
 
 // Middleware
@@ -17,6 +21,28 @@ app.use(cors({
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 app.use(express.json());
+
+// Endpoints to serve raw JSON specifications
+app.get("/docs/backend.json", (req, res) => res.json(swaggerBackend));
+app.get("/docs/ml.json", (req, res) => res.json(swaggerML));
+
+// Swagger documentation route with API Explorer dropdown toggling
+const swaggerOptions = {
+    explorer: true,
+    swaggerOptions: {
+        urls: [
+            {
+                url: "/docs/backend.json",
+                name: "NodeJS Backend API"
+            },
+            {
+                url: "/docs/ml.json",
+                name: "FastAPI Machine Learning API"
+            }
+        ]
+    }
+};
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
 
 // Routes
 app.use("/api/v1/auth", authRoutes);

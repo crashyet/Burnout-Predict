@@ -1,0 +1,145 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "FastAPI Machine Learning API Docs",
+    "version": "1.0.0",
+    "description": "API Model Machine Learning untuk prediksi emosi teks dan GRU Forecasting tingkat burnout."
+  },
+  "servers": [
+    {
+      "url": "https://crashyet-burnout-predict.hf.space",
+      "description": "Production ML Server"
+    }
+  ],
+  "paths": {
+    "/predict-emotion": {
+      "post": {
+        "tags": ["Emotion Model"],
+        "summary": "Prediksi Emosi Teks (ML Server)",
+        "description": "Mengklasifikasikan teks menjadi salah satu emosi (anger, fear, happy, love, sadness) beserta daftar 2 emosi teratas.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["text"],
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "example": "Hari ini saya merasa lelah sekali, pekerjaan menumpuk."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analisis emosi berhasil.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "final_emotion": { "type": "string", "example": "sadness" },
+                    "top_2_emotions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "emotion": { "type": "string", "example": "sadness" },
+                          "probability": { "type": "number", "example": 0.954 }
+                        }
+                      }
+                    },
+                    "all_probabilities": {
+                      "type": "object",
+                      "properties": {
+                        "anger": { "type": "number", "example": 0.035 },
+                        "fear": { "type": "number", "example": 0.003 },
+                        "happy": { "type": "number", "example": 0.008 },
+                        "love": { "type": "number", "example": 0.001 },
+                        "sadness": { "type": "number", "example": 0.954 }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/predict-burnout": {
+      "post": {
+        "tags": ["Burnout Model"],
+        "summary": "Prediksi Skor Burnout (ML Server)",
+        "description": "Melakukan peramalan (forecasting) tingkat burnout berdasarkan data histori jam tidur, jam kerja, skor burnout 7 hari terakhir, dan skor kuesioner terbaru.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["work_hours_list", "sleep_hours_list", "burnout_score_list", "questionnaire_score"],
+                "properties": {
+                  "work_hours_list": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "example": [8.0, 9.0, 7.5, 8.5, 10.0, 6.0, 8.0]
+                  },
+                  "sleep_hours_list": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "example": [7.0, 6.5, 5.0, 7.0, 5.5, 8.0, 7.0]
+                  },
+                  "burnout_score_list": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "example": [45.0, 47.0, 50.0, 52.0, 55.0, 51.0, 53.0]
+                  },
+                  "questionnaire_score": {
+                    "type": "number",
+                    "example": 55.0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prediksi burnout berhasil.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "behavior_prediction_score": { "type": "number", "example": 52.3 },
+                    "questionnaire_score": { "type": "number", "example": 55.0 },
+                    "final_burnout_score": { "type": "number", "example": 53.65 },
+                    "final_burnout_level": { "type": "string", "example": "Moderate" },
+                    "difference": { "type": "number", "example": 2.7 },
+                    "weighting_type": { "type": "string", "example": "balanced weighting" },
+                    "note": { "type": "string", "example": "Balanced weighting prediction successful" },
+                    "trend_warning": {
+                      "type": "object",
+                      "properties": {
+                        "trend": { "type": "string", "example": "increasing" },
+                        "avg_delta": { "type": "number", "example": 1.2 },
+                        "streak_up": { "type": "integer", "example": 2 },
+                        "severity": { "type": "string", "example": "medium" },
+                        "warning": { "type": "string", "example": "Burnout kamu perlahan naik..." }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
