@@ -2,7 +2,7 @@ const fs = require("node:fs")
 require("dotenv").config();
 const { dirname, basename, join } = require("node:path")
 const { Umzug } = require("umzug")
-const { sql } = require("@databases/mysql")
+const { sql } = require("@databases/pg")
 const db = require("./src/config/db")
 
 const umzug = new Umzug({

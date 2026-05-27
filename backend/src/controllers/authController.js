@@ -1,6 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { sql } = require("@databases/mysql");
+const { sql } = require("@databases/pg");
 const db = require("../config/db");
 const { sendVerificationEmail } = require("../config/mailer");
 const { successResponse, errorResponse } = require("../utils/response");

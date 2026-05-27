@@ -1,4 +1,4 @@
-const { sql } = require("@databases/mysql");
+const { sql } = require("@databases/pg");
 const db = require("../config/db");
 const { successResponse, errorResponse } = require("../utils/response");
 
@@ -69,8 +69,9 @@ const createJournal = async (req, res) => {
     const journalResult = await db.query(sql`
       INSERT INTO journals (user_id, content, mood_expression, sentiment_score)
       VALUES (${userId}, ${content}, NULL, NULL)
+      RETURNING id
     `);
-    const journalId = journalResult.insertId;
+    const journalId = journalResult[0].id;
 
     // Save individual emotions into journal_emotions
     for (const [emotion, prob] of Object.entries(all_probabilities)) {

@@ -1,4 +1,4 @@
-const { sql } = require("@databases/mysql");
+const { sql } = require("@databases/pg");
 const db = require("../config/db");
 const { successResponse, errorResponse } = require("../utils/response");
 
@@ -104,10 +104,21 @@ const getAssessments = async (req, res) => {
   const userId = req.user.id;
   try {
     const assessments = await db.query(sql`SELECT * FROM self_assessments WHERE user_id = ${userId} ORDER BY created_at DESC`);
-    // Parse JSON answers back to object
-    const results = assessments.map(a => ({...a, answers: JSON.parse(a.answers)}));
+    // Parse JSON answers back to object safely
+    const results = assessments.map(a => {
+      let parsedAnswers = a.answers;
+      if (typeof a.answers === "string") {
+        try {
+          parsedAnswers = JSON.parse(a.answers);
+        } catch (e) {
+          console.error("Failed to parse answers JSON:", e);
+        }
+      }
+      return { ...a, answers: parsedAnswers };
+    });
     return successResponse(res, "Assessments retrieved", results);
   } catch (err) {
+    console.error("Failed to retrieve assessments:", err);
     return errorResponse(res, "Failed to retrieve assessments");
   }
 };
