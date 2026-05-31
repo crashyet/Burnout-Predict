@@ -1,7 +1,7 @@
 // ─── User & Session Types ──────────────────────────────────────────────────────
 
 export interface User {
-  id?: string
+  id?: string | number
   name: string
   email: string
 }
