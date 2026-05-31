@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useAnimationControls } from 'framer-motion'
 import { AuthLayout } from '../components/layout/AuthLayout'
-import { verifyOtp } from '../services/authService'
+import { verifyOtp, resendOtp, saveSession } from '../services/authService'
 
 const OTP_LENGTH = 6
 
@@ -142,11 +142,16 @@ export function OtpVerifyPage() {
       return
     }
 
-    // Read the email of the pending user (stored during registration)
+    // Read the email of the pending user (stored during registration or login)
     let pendingEmail = ''
+    let fromLogin = false
     try {
       const raw = localStorage.getItem('pending_user')
-      if (raw) pendingEmail = (JSON.parse(raw) as { email?: string }).email ?? ''
+      if (raw) {
+        const parsed = JSON.parse(raw) as { email?: string; fromLogin?: boolean }
+        pendingEmail = parsed.email ?? ''
+        fromLogin = parsed.fromLogin ?? false
+      }
     } catch { /* ignore */ }
 
     const result = await verifyOtp({ email: pendingEmail, otp_code: otpCode })
@@ -155,13 +160,42 @@ export function OtpVerifyPage() {
       return
     }
 
-    setStatus({ type: 'success', text: 'Verifikasi berhasil. Mengalihkan ke Login...' })
-    window.setTimeout(() => navigate('/login'), 900)
+    if (fromLogin && result.token && result.user) {
+      saveSession(result.user, result.token)
+      setStatus({ type: 'success', text: 'Verifikasi berhasil. Mengalihkan ke Dashboard...' })
+      window.setTimeout(() => navigate('/dashboard'), 900)
+    } else {
+      setStatus({ type: 'success', text: 'Verifikasi berhasil. Mengalihkan ke Login...' })
+      window.setTimeout(() => navigate('/login'), 900)
+    }
   }
 
-  const handleResend = () => {
+  const handleResend = async () => {
+    let pendingEmail = ''
+    try {
+      const raw = localStorage.getItem('pending_user')
+      if (raw) pendingEmail = (JSON.parse(raw) as { email?: string }).email ?? ''
+    } catch { /* ignore */ }
+
+    if (!pendingEmail) {
+      setStatus({ type: 'error', text: 'Email tidak ditemukan. Silakan registrasi ulang.' })
+      return
+    }
+
     setOtp(Array(OTP_LENGTH).fill(''))
     setStatus({ type: 'idle', text: '' })
+
+    const result = await resendOtp({ email: pendingEmail })
+    if (!result.success) {
+      await triggerErrorAnimation(result.error ?? 'Gagal mengirim ulang OTP.')
+      return
+    }
+
+    setStatus({ type: 'success', text: 'OTP baru telah dikirim ke email kamu.' })
+    window.setTimeout(() => {
+      setStatus({ type: 'idle', text: '' })
+    }, 3000)
+
     setCountdown(60)
     setIsResendDisabled(true)
     window.setTimeout(() => focusInput(0), 0)

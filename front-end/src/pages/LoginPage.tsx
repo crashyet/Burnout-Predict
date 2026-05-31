@@ -21,6 +21,9 @@ export function LoginPage() {
     const res = await loginUser({ email: email.trim(), password })
     if (res.success) {
       navigate('/dashboard')
+    } else if (res.unverified) {
+      localStorage.setItem('pending_user', JSON.stringify({ email: res.email || email.trim(), fromLogin: true }))
+      navigate('/otp-verify')
     } else {
       setError(res.error || 'Terjadi kesalahan saat masuk.')
     }

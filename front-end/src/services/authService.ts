@@ -9,7 +9,7 @@
  * All pages should import from this file only – never fetch auth endpoints directly.
  */
 
-import { apiClient, isMockMode } from './apiClient'
+import { apiClient, isMockMode, isApiError } from './apiClient'
 import type {
   RegisterPayload,
   VerifyOtpPayload,
@@ -92,6 +92,10 @@ export async function registerUser(payload: RegisterPayload): Promise<AuthResult
     writeJson(KEYS.PENDING_USER, { email: payload.email, name: payload.name, password: '', verified: false })
     return { success: true }
   } catch (err) {
+    if (isApiError(err)) {
+      const body = err.body as { message?: string } | undefined
+      return { success: false, error: body?.message || err.message }
+    }
     const message = err instanceof Error ? err.message : 'Registrasi gagal. Coba lagi.'
     return { success: false, error: message }
   }
@@ -115,15 +119,51 @@ export async function verifyOtp(payload: VerifyOtpPayload): Promise<AuthResult> 
     else users.push(verified)
     writeJson(KEYS.REGISTERED_USERS, users)
     localStorage.removeItem(KEYS.PENDING_USER)
+    return {
+      success: true,
+      token: 'mock-jwt-token',
+      user: {
+        id: 'mock-user-id',
+        name: pending.name || 'Mock User',
+        email: pending.email,
+      }
+    }
+  }
+
+  try {
+    const res = await apiClient.post<VerifyOtpResponse>('/auth/verify-otp', payload)
+    localStorage.removeItem(KEYS.PENDING_USER)
+    return {
+      success: true,
+      token: res.data?.token,
+      user: res.data?.user,
+    }
+  } catch (err) {
+    if (isApiError(err)) {
+      const body = err.body as { message?: string } | undefined
+      return { success: false, error: body?.message || err.message }
+    }
+    const message = err instanceof Error ? err.message : 'Verifikasi OTP gagal.'
+    return { success: false, error: message }
+  }
+}
+
+// ─── Resend OTP ───────────────────────────────────────────────────────────────
+
+export async function resendOtp(payload: { email: string }): Promise<AuthResult> {
+  if (isMockMode) {
     return { success: true }
   }
 
   try {
-    await apiClient.post('/auth/verify-otp', payload)
-    localStorage.removeItem(KEYS.PENDING_USER)
+    await apiClient.post('/auth/resend-otp', payload)
     return { success: true }
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Verifikasi OTP gagal.'
+    if (isApiError(err)) {
+      const body = err.body as { message?: string } | undefined
+      return { success: false, error: body?.message || err.message }
+    }
+    const message = err instanceof Error ? err.message : 'Gagal mengirim ulang OTP.'
     return { success: false, error: message }
   }
 }
@@ -153,10 +193,28 @@ export async function loginUser(payload: LoginPayload): Promise<AuthResult> {
   }
 
   try {
-    const res = await apiClient.post<LoginResponse>('/auth/login', payload)
-    saveSession({ name: res.user.name, email: res.user.email, id: res.user.id }, res.token)
+    // Ambil properti 'data' dari Axios, lalu ambil 'data' asli dari API kamu
+    const { data: apiResponse } = await apiClient.post<LoginResponse>('/auth/login', payload)
+    
+    const { user, token } = apiResponse
+    console.log({ user, token })
+
+    saveSession({ name: user.name, email: user.email, id: user.id }, token)
     return { success: true }
   } catch (err) {
+    if (isApiError(err)) {
+      const body = err.body as { errors?: { unverified?: boolean; email?: string }; message?: string } | undefined;
+      if (body?.errors?.unverified) {
+        return {
+          success: false,
+          unverified: true,
+          email: body.errors.email,
+          error: body.message || err.message,
+        }
+      }
+      const message = body?.message || err.message
+      return { success: false, error: message }
+    }
     const message = err instanceof Error ? err.message : 'Login gagal. Periksa email dan kata sandi.'
     return { success: false, error: message }
   }

@@ -26,6 +26,14 @@ export interface RegisterResponse {
 export interface VerifyOtpResponse {
   message: string
   verified?: boolean
+  data?: {
+    token: string
+    user: {
+      id?: string | number
+      name: string
+      email: string
+    }
+  }
 }
 
 export interface LoginResponse {
@@ -48,4 +56,12 @@ export interface ProfileResponse {
 export interface AuthResult {
   success: boolean
   error?: string
+  unverified?: boolean
+  email?: string
+  token?: string
+  user?: {
+    id?: string | number
+    name: string
+    email: string
+  }
 }

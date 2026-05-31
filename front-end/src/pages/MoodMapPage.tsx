@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { DashboardLayout } from '../components/layout/DashboardLayout'
-import { getHistoryList, getJournalsByDate, type DailyHistory } from '../services/historyService'
+import { type DailyHistory } from '../services/historyService'
+import { getCheckIns, getJournals } from '../services/trackingService'
+import type { Journal } from '../types/tracking'
 
 const MOOD_CONFIG: Record<string, { bg: string; text: string; label: string; icon: string }> = {
-  Tenang: { bg: 'bg-secondary-container', text: 'text-on-secondary-fixed-variant', label: 'Tenang', icon: 'spa' },
-  Bahagia: { bg: 'bg-tertiary-fixed', text: 'text-tertiary', label: 'Bahagia', icon: 'sentiment_very_satisfied' },
-  Senang: { bg: 'bg-tertiary-fixed', text: 'text-tertiary', label: 'Bahagia', icon: 'sentiment_very_satisfied' }, // Synonym
-  Cemas: { bg: 'bg-error-container', text: 'text-on-error-container', label: 'Cemas', icon: 'sentiment_dissatisfied' },
-  Lelah: { bg: 'bg-surface-container-high', text: 'text-on-primary-container', label: 'Lelah', icon: 'battery_alert' },
-  Stres: { bg: 'bg-error text-white', text: 'text-on-error', label: 'Stres', icon: 'warning' },
-  Sedih: { bg: 'bg-surface-dim', text: 'text-on-surface', label: 'Sedih', icon: 'sentiment_very_dissatisfied' },
+  Tenang: { bg: 'mood-tenang', text: '', label: 'Tenang', icon: 'spa' },
+  Bahagia: { bg: 'mood-bahagia', text: '', label: 'Bahagia', icon: 'sentiment_very_satisfied' },
+  Senang: { bg: 'mood-bahagia', text: '', label: 'Bahagia', icon: 'sentiment_very_satisfied' }, // Synonym
+  Cemas: { bg: 'mood-cemas', text: '', label: 'Cemas', icon: 'sentiment_dissatisfied' },
+  Lelah: { bg: 'mood-lelah', text: '', label: 'Lelah', icon: 'battery_alert' },
+  Stres: { bg: 'mood-stres', text: '', label: 'Stres', icon: 'warning' },
+  Sedih: { bg: 'mood-sedih', text: '', label: 'Sedih', icon: 'sentiment_very_dissatisfied' },
 }
 
 const RISK_BADGES: Record<'Rendah' | 'Sedang' | 'Tinggi', { badge: string; text: string }> = {
@@ -73,7 +75,7 @@ function MoodCalendar({
       const dateStr = `${selectedMonth}-${dStr}`
       const historyItem = historyList.find((h) => h.date === dateStr)
 
-      let cellClass = 'bg-surface-container-lowest text-on-surface-variant hover:bg-primary/5 hover:text-primary border border-outline-variant/10'
+      let cellClass = 'text-on-surface-variant'
       let moodEmotion = ''
 
       if (historyItem) {
@@ -121,18 +123,24 @@ function MoodCalendar({
           }
 
           const isSelected = selectedDate === cell.dateStr
-          const selectedRing = isSelected ? 'ring-2 ring-primary ring-offset-2 scale-105 z-10 shadow-md' : ''
+          const selectedRing = isSelected
+            ? 'border-2 border-primary scale-105 z-10 shadow-md'
+            : 'border border-outline-variant/10'
 
           return (
             <button
               key={cell.dateStr}
               onClick={() => onSelectDate(cell.dateStr)}
-              className={`aspect-square rounded-xl flex flex-col items-center justify-center text-sm font-semibold transition-all duration-200 ${cell.className} ${selectedRing}`}
+              className={`aspect-square rounded-full flex flex-col items-center justify-center text-sm font-semibold transition-all duration-200 shadow-sm cursor-pointer ${
+                cell.hasData
+                  ? cell.className
+                  : 'bg-white text-on-surface hover:bg-primary/5 hover:text-primary hover:border-primary/30'
+              } ${selectedRing}`}
               type="button"
             >
-              <span>{cell.day}</span>
+              <span className={cell.hasData ? '-translate-y-0.5' : ''}>{cell.day}</span>
               {cell.hasData && (
-                <span className="w-1.5 h-1.5 rounded-full bg-primary/80 mt-1" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary mt-0.5" />
               )}
             </button>
           )
@@ -146,12 +154,12 @@ function MoodCalendar({
 
 function MoodLegend() {
   const legends = [
-    { label: 'Tenang', dotClass: 'bg-secondary-container border-secondary-container' },
-    { label: 'Bahagia', dotClass: 'bg-tertiary-fixed border-tertiary-fixed' },
-    { label: 'Cemas', dotClass: 'bg-error-container border-error-container' },
-    { label: 'Lelah', dotClass: 'bg-surface-container-high border-surface-container-high' },
-    { label: 'Stres', dotClass: 'bg-error border-error' },
-    { label: 'Sedih', dotClass: 'bg-surface-dim border-surface-dim' },
+    { label: 'Tenang', dotClass: 'mood-tenang border-transparent' },
+    { label: 'Bahagia', dotClass: 'mood-bahagia border-transparent' },
+    { label: 'Cemas', dotClass: 'mood-cemas border-transparent' },
+    { label: 'Lelah', dotClass: 'mood-lelah border-transparent' },
+    { label: 'Stres', dotClass: 'mood-stres border-transparent' },
+    { label: 'Sedih', dotClass: 'mood-sedih border-transparent' },
   ]
 
   return (
@@ -311,15 +319,13 @@ function MoodInsightCard({ monthlyData }: { monthlyData: DailyHistory[] }) {
 function SelectedDateDetail({
   selectedDate,
   historyItem,
+  journals,
 }: {
   selectedDate: string
   historyItem: DailyHistory | null
+  journals: Journal[]
 }) {
   const formattedDate = formatIndonesianDate(selectedDate)
-
-  const journals = useMemo(() => {
-    return getJournalsByDate(selectedDate)
-  }, [selectedDate])
 
   const hasData = historyItem !== null || journals.length > 0
 
@@ -509,11 +515,10 @@ function HistoryList({
               <button
                 key={item.date}
                 onClick={() => onSelectDate(item.date)}
-                className={`w-full text-left p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 cursor-pointer ${
-                  isSelected
-                    ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary'
-                    : 'border-outline-variant/20 bg-surface-container-low/30 hover:border-outline-variant/60 hover:bg-surface-container-low/60'
-                }`}
+                className={`w-full text-left p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 cursor-pointer ${isSelected
+                  ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary'
+                  : 'border-outline-variant/20 bg-surface-container-low/30 hover:border-outline-variant/60 hover:bg-surface-container-low/60'
+                  }`}
                 type="button"
               >
                 <div className="flex items-center gap-3">
@@ -563,11 +568,10 @@ function HistoryList({
                   <button
                     key={p}
                     onClick={() => onPageChange(p)}
-                    className={`w-8 h-8 rounded-full text-[13px] font-bold transition-all ${
-                      isActive
-                        ? 'bg-primary text-on-primary shadow-md shadow-primary/20'
-                        : 'border border-outline-variant/30 hover:bg-surface-container-low text-on-surface-variant'
-                    }`}
+                    className={`w-8 h-8 rounded-full text-[13px] font-bold transition-all ${isActive
+                      ? 'bg-primary text-on-primary shadow-md shadow-primary/20'
+                      : 'border border-outline-variant/30 hover:bg-surface-container-low text-on-surface-variant'
+                      }`}
                     type="button"
                   >
                     {p}
@@ -595,15 +599,65 @@ export function MoodMapPage() {
   const location = useLocation()
   const isHistorySection = location.search.includes('section=history')
 
-  const [selectedMonth, setSelectedMonth] = useState('2026-05')
-  const [selectedDate, setSelectedDate] = useState('2026-05-29')
-  const [historyList, setHistoryList] = useState<DailyHistory[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
+  const today = new Date()
+  const yyyy = today.getFullYear()
+  const mm = String(today.getMonth() + 1).padStart(2, '0')
+  const dd = String(today.getDate()).padStart(2, '0')
+  const todayStr = `${yyyy}-${mm}-${dd}`
+  const currentMonthStr = `${yyyy}-${mm}`
 
-  // Load history list from localStorage on mount
+  const [selectedMonth, setSelectedMonth] = useState(currentMonthStr)
+  const [selectedDate, setSelectedDate] = useState(todayStr)
+  const [historyList, setHistoryList] = useState<DailyHistory[]>([])
+  const [journalsList, setJournalsList] = useState<Journal[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Load history and journal list from backend on mount
   useEffect(() => {
-    const list = getHistoryList()
-    setHistoryList(list)
+    async function loadData() {
+      try {
+        setIsLoading(true)
+        const [checkins, journals] = await Promise.all([
+          getCheckIns(),
+          getJournals()
+        ])
+
+        setJournalsList(journals)
+
+        // Merge checkins and journals by date into DailyHistory items
+        const dates = Array.from(new Set([
+          ...checkins.map((c) => c.date),
+          ...journals.map((j) => j.date)
+        ])).sort((a, b) => b.localeCompare(a))
+
+        const merged: DailyHistory[] = dates.map((date) => {
+          const c = checkins.find((x) => x.date === date)
+          const js = journals.filter((x) => x.date === date)
+
+          const journalText = js.map((j) => j.content).join('\n')
+          const emotion = js.length > 0
+            ? (js[0].detectedEmotion || 'Netral')
+            : (c ? (c.riskLevel === 'Tinggi' ? 'Stres' : c.riskLevel === 'Sedang' ? 'Lelah' : 'Tenang') : 'Tenang')
+
+          return {
+            date,
+            journal: journalText,
+            emotion,
+            burnoutScore: c ? (c.score_assessment ?? c.burnoutScore ?? 0) : 0,
+            riskLevel: c ? (c.riskLevel as 'Rendah' | 'Sedang' | 'Tinggi') : 'Rendah',
+          }
+        })
+
+        setHistoryList(merged)
+      } catch (err) {
+        console.error('Failed to load mood map history:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadData()
   }, [])
 
   // Filter history items by selected month
@@ -615,6 +669,11 @@ export function MoodMapPage() {
   const selectedHistoryItem = useMemo(() => {
     return historyList.find((item) => item.date === selectedDate) || null
   }, [historyList, selectedDate])
+
+  // Get journals for the selected date
+  const selectedDateJournals = useMemo(() => {
+    return journalsList.filter(j => j.date === selectedDate)
+  }, [journalsList, selectedDate])
 
   // Scroll to History section if routed via '/mood-map?section=history'
   useEffect(() => {
@@ -646,6 +705,38 @@ export function MoodMapPage() {
     }
   }
 
+  const monthOptions = useMemo(() => {
+    const options = []
+    const months = [
+      'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ]
+    const d = new Date()
+    d.setDate(1) // Avoid day-overflow duplicate month bug when current date is the 31st
+    for (let i = 0; i < 6; i++) {
+      const year = d.getFullYear()
+      const monthNum = d.getMonth() + 1
+      const val = `${year}-${String(monthNum).padStart(2, '0')}`
+      const label = `${months[d.getMonth()]} ${year}`
+      options.push({ val, label })
+      d.setMonth(d.getMonth() - 1)
+    }
+    return options
+  }, [])
+
+  if (isLoading) {
+    return (
+      <DashboardLayout
+        currentPath={isHistorySection ? '/mood-map?section=history' : '/mood-map'}
+        topbarTitle="Pemetaan Mood & Riwayat"
+      >
+        <div className="min-h-[50vh] grid place-items-center">
+          <div className="w-12 h-12 rounded-full border-4 border-surface-container-high border-t-primary animate-spin" />
+        </div>
+      </DashboardLayout>
+    )
+  }
+
   return (
     <DashboardLayout
       currentPath={isHistorySection ? '/mood-map?section=history' : '/mood-map'}
@@ -667,9 +758,11 @@ export function MoodMapPage() {
             onChange={handleMonthChange}
             className="appearance-none bg-surface-container-lowest border border-outline-variant text-on-surface font-label-md text-label-md py-2.5 pl-4 pr-10 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary focus:outline-none shadow-sm cursor-pointer hover:bg-surface-container-low transition-colors"
           >
-            <option value="2026-05">Mei 2026</option>
-            <option value="2026-04">April 2026</option>
-            <option value="2026-03">Maret 2026</option>
+            {monthOptions.map((opt) => (
+              <option key={opt.val} value={opt.val}>
+                {opt.label}
+              </option>
+            ))}
           </select>
           <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">
             expand_more
@@ -710,6 +803,7 @@ export function MoodMapPage() {
             <SelectedDateDetail
               selectedDate={selectedDate}
               historyItem={selectedHistoryItem}
+              journals={selectedDateJournals}
             />
           </div>
 

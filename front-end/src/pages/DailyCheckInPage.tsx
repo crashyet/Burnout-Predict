@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { DashboardLayout } from '../components/layout/DashboardLayout'
+import { createCheckIn, getCheckIns, getLocalDateString } from '../services/trackingService'
 
 type CheckInQuestionProps = {
   label: string
@@ -187,6 +188,9 @@ function StepFour({
   sleepHours,
   workHours,
   onEditAnswers,
+  alreadySubmitted,
+  note,
+  warning,
 }: {
   isAnalyzed: boolean
   score: number
@@ -194,24 +198,16 @@ function StepFour({
   sleepHours: number
   workHours: number
   onEditAnswers: () => void
+  alreadySubmitted?: boolean
+  note?: string
+  warning?: string
 }) {
   const circleLength = 389.56
   const offset = circleLength - (score / 100) * circleLength
 
   const prediction = risk === 'Tinggi' ? 'Risiko burnout perlu diperhatikan' : risk === 'Sedang' ? 'Risiko burnout perlu dipantau' : 'Kondisi cenderung stabil'
-  const recommendation =
-    risk === 'Tinggi'
-      ? 'Coba kurangi aktivitas berat, ambil jeda lebih sering, dan prioritaskan istirahat. Jika kondisi terus berulang, pertimbangkan untuk berbicara dengan orang yang Anda percaya.'
-      : risk === 'Sedang'
-        ? 'Coba ambil jeda singkat, kurangi aktivitas berat malam ini, dan prioritaskan waktu istirahat agar energi Anda kembali stabil.'
-        : 'Pertahankan pola istirahat dan aktivitas yang seimbang. Tetap lakukan check-in harian agar pola burnout lebih mudah dipantau.'
-
-  const insight =
-    risk === 'Tinggi'
-      ? 'Jawaban Anda menunjukkan tanda kelelahan yang cukup kuat, terutama pada energi, tekanan, dan kemampuan menghadapi aktivitas harian. Beri ruang untuk pemulihan agar kondisi tidak semakin berat.'
-      : risk === 'Sedang'
-        ? 'Jawaban Anda menunjukkan adanya tanda kelelahan fisik dan tekanan tanggung jawab yang cukup terasa. Luangkan waktu untuk beristirahat dan atur kembali prioritas aktivitas hari ini.'
-        : 'Data check-in Anda menunjukkan kondisi yang cukup terkendali. Tetap jaga ritme kerja, istirahat, dan beri ruang untuk pemulihan ringan.'
+  const insight = warning || ''
+  const recommendation = note || ''
 
   if (!isAnalyzed) {
     return (
@@ -254,6 +250,16 @@ function StepFour({
 
   return (
     <section>
+      {alreadySubmitted && (
+        <div className="mb-8 rounded-[2rem] bg-amber-50 border border-amber-200 p-5 flex flex-col sm:flex-row items-center gap-4 shadow-sm">
+          <div className="w-12 h-12 shrink-0 rounded-full bg-amber-100 flex items-center justify-center text-amber-800">
+            <span className="material-symbols-outlined">info</span>
+          </div>
+          <p className="flex-1 text-center sm:text-left text-amber-900 font-semibold leading-relaxed">
+            Anda telah menyelesaikan check-in harian hari ini. Pengisian ulang atau pengubahan jawaban baru dapat dilakukan kembali besok.
+          </p>
+        </div>
+      )}
       <div className="mb-10 text-center max-w-2xl mx-auto">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface-container-high text-primary font-bold text-xs mb-5">
           <span className="material-symbols-outlined text-[16px]">check_circle</span>
@@ -279,9 +285,8 @@ function StepFour({
             </div>
           </div>
           <span
-            className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold ${
-              risk === 'Tinggi' ? 'bg-error-container text-on-error-container' : risk === 'Sedang' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'
-            }`}
+            className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-bold ${risk === 'Tinggi' ? 'bg-error-container text-on-error-container' : risk === 'Sedang' ? 'bg-secondary/10 text-secondary' : 'bg-primary/10 text-primary'
+              }`}
           >
             Risiko {risk}
           </span>
@@ -349,14 +354,18 @@ function StepFour({
       </div>
 
       <div className="mt-8 flex flex-col sm:flex-row justify-between gap-3">
-        <button
-          type="button"
-          onClick={onEditAnswers}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-white border border-outline-variant px-7 py-3 text-on-surface font-bold hover:bg-surface-container-low transition"
-        >
-          <span className="material-symbols-outlined">edit</span>
-          Ubah Jawaban
-        </button>
+        {!alreadySubmitted ? (
+          <button
+            type="button"
+            onClick={onEditAnswers}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-white border border-outline-variant px-7 py-3 text-on-surface font-bold hover:bg-surface-container-low transition"
+          >
+            <span className="material-symbols-outlined">edit</span>
+            Ubah Jawaban
+          </button>
+        ) : (
+          <div />
+        )}
 
         <a
           href="/dashboard"
@@ -371,22 +380,92 @@ function StepFour({
 }
 
 export function DailyCheckInPage() {
-  const [sleepHours, setSleepHours] = useState(7)
-  const [workHours, setWorkHours] = useState(8)
+  const savedTodayCheckin = useMemo(() => {
+    const todayCheckInStr = localStorage.getItem('today_checkin')
+    if (!todayCheckInStr) return null
+    try {
+      const parsed = JSON.parse(todayCheckInStr)
+      if (!parsed.timestamp) return null
+      const checkInDate = parsed.timestamp.split('T')[0]
+      if (checkInDate === getLocalDateString()) {
+        return parsed
+      }
+    } catch { }
+    return null
+  }, [])
+
+  const [sleepHours, setSleepHours] = useState(savedTodayCheckin?.sleepHours ?? 7)
+  const [workHours, setWorkHours] = useState(savedTodayCheckin?.workHours ?? 8)
   const [questionnaireAnswers, setQuestionnaireAnswers] = useState([5, 5, 5, 5, 5, 5, 5, 5, 5, 5])
-  const [currentStep, setCurrentStep] = useState(1)
-  const [isAnalyzed, setIsAnalyzed] = useState(false)
+  const [currentStep, setCurrentStep] = useState(savedTodayCheckin ? 4 : 1)
+  const [isAnalyzed, setIsAnalyzed] = useState(!!savedTodayCheckin)
   const [errorText, setErrorText] = useState('')
+  const [note, setNote] = useState<string | undefined>(savedTodayCheckin?.note)
+  const [warning, setWarning] = useState<string | undefined>(savedTodayCheckin?.warning)
+  const [isLoading, setIsLoading] = useState(true)
+  const [alreadyCheckedIn, setAlreadyCheckedIn] = useState(!!savedTodayCheckin)
+  const [scoreFromDB, setScoreFromDB] = useState<number | null>(savedTodayCheckin?.score ?? null)
+  const [riskFromDB, setRiskFromDB] = useState<string | null>(savedTodayCheckin?.risk ?? null)
+
+  useEffect(() => {
+    async function checkStatus() {
+      try {
+        const checkins = await getCheckIns()
+        const todayStr = getLocalDateString()
+        const todayCheckIn = checkins.find((c) => {
+          const cDate = c.createdAt ? c.createdAt.split('T')[0] : c.date
+          return cDate === todayStr
+        })
+
+        if (todayCheckIn) {
+          setSleepHours(todayCheckIn.sleep_hours)
+          setWorkHours(todayCheckIn.work_hours ?? 8)
+          setScoreFromDB(todayCheckIn.score_assessment ?? todayCheckIn.burnoutScore ?? null)
+          setRiskFromDB(todayCheckIn.riskLevel ?? null)
+          setNote(todayCheckIn.note)
+          setWarning(todayCheckIn.warning)
+          setAlreadyCheckedIn(true)
+          setCurrentStep(4)
+          setIsAnalyzed(true)
+
+          localStorage.setItem(
+            'today_checkin',
+            JSON.stringify({
+              sleepHours: todayCheckIn.sleep_hours,
+              workHours: todayCheckIn.work_hours ?? 8,
+              score: todayCheckIn.score_assessment ?? todayCheckIn.burnoutScore,
+              risk: todayCheckIn.riskLevel,
+              note: todayCheckIn.note,
+              warning: todayCheckIn.warning,
+              timestamp: todayCheckIn.createdAt || new Date().toISOString()
+            })
+          )
+        } else {
+          setAlreadyCheckedIn(false)
+          localStorage.removeItem('today_checkin')
+          setScoreFromDB(null)
+          setRiskFromDB(null)
+          setNote(undefined)
+          setWarning(undefined)
+          setCurrentStep(1)
+          setIsAnalyzed(false)
+        }
+      } catch (err) {
+        console.error("Failed to check status from database:", err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    checkStatus()
+  }, [])
 
   const score = useMemo(() => {
+    if (alreadyCheckedIn && scoreFromDB !== null) return scoreFromDB
     const average = questionnaireAnswers.reduce((sum, value) => sum + value, 0) / questionnaireAnswers.length
-    const questionnaireScore = average * 8
-    const sleepPenalty = sleepHours < 6 ? (6 - sleepHours) * 5 : sleepHours > 9 ? (sleepHours - 9) * 2 : 0
-    const workPenalty = workHours > 8 ? (workHours - 8) * 3 : 0
-    return Math.max(0, Math.min(100, Math.round(questionnaireScore + sleepPenalty + workPenalty)))
-  }, [questionnaireAnswers, sleepHours, workHours])
+    return Math.max(0, Math.min(100, Math.round(average * 10)))
+  }, [questionnaireAnswers, alreadyCheckedIn, scoreFromDB])
 
-  const risk = score > 70 ? 'Tinggi' : score >= 40 ? 'Sedang' : 'Rendah'
+  const risk = alreadyCheckedIn && riskFromDB ? riskFromDB : (score > 70 ? 'Tinggi' : score >= 40 ? 'Sedang' : 'Rendah')
 
   const validateCurrentStep = () => {
     if (currentStep === 1 && (sleepHours < 0 || sleepHours > 24)) return 'Jam tidur harus di antara 0 dan 24 jam.'
@@ -410,7 +489,7 @@ export function DailyCheckInPage() {
     setCurrentStep((prev) => Math.max(prev - 1, 1))
   }
 
-  const analyzeCheckIn = () => {
+  const analyzeCheckIn = async () => {
     const err = validateCurrentStep()
     if (err) {
       setErrorText(err)
@@ -420,8 +499,49 @@ export function DailyCheckInPage() {
     setErrorText('')
     setCurrentStep(4)
     setIsAnalyzed(false)
-    window.setTimeout(() => {
+
+    const payload = {
+      date: getLocalDateString(),
+      sleep_hours: sleepHours,
+      work_hours: workHours,
+      score_assessment: score,
+    }
+
+    console.log("==================== FRONTEND CHECK-IN REQUEST ====================")
+    console.log("Payload sent to backend:", payload)
+    console.log("===================================================================")
+
+    try {
+      const res = await createCheckIn(payload)
+
+      console.log("==================== FRONTEND CHECK-IN RESPONSE ===================")
+      console.log("Response received from backend:", res)
+      console.log("===================================================================")
+
+      const finalScore = res.score_assessment ?? res.burnoutScore ?? score
+      const finalRisk = res.riskLevel ?? (score > 70 ? 'Tinggi' : score >= 40 ? 'Sedang' : 'Rendah')
+
+      setNote(res.note)
+      setWarning(res.warning)
+
+      localStorage.setItem(
+        'today_checkin',
+        JSON.stringify({
+          sleepHours,
+          workHours,
+          score: finalScore,
+          risk: finalRisk,
+          note: res.note,
+          warning: res.warning,
+          timestamp: new Date().toISOString()
+        })
+      )
       setIsAnalyzed(true)
+    } catch (err: any) {
+      console.error(err)
+      setErrorText(err?.message || 'Gagal menyimpan check-in ke server.')
+
+      // Fallback local storage saving so user flow is not broken
       localStorage.setItem(
         'today_checkin',
         JSON.stringify({
@@ -432,7 +552,18 @@ export function DailyCheckInPage() {
           timestamp: new Date().toISOString()
         })
       )
-    }, 1600)
+      setIsAnalyzed(true)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <DashboardLayout currentPath="/daily-checkin" topbarTitle="Check-In Harian">
+        <div className="min-h-[calc(100vh-12rem)] grid place-items-center">
+          <div className="mx-auto w-[92px] h-[92px] rounded-full border-8 border-surface-container-high border-t-primary animate-spin" />
+        </div>
+      </DashboardLayout>
+    )
   }
 
   return (
@@ -442,7 +573,17 @@ export function DailyCheckInPage() {
         {currentStep === 2 ? <WorkStep workHours={workHours} setWorkHours={setWorkHours} /> : null}
         {currentStep === 3 ? <QuestionnaireStep answers={questionnaireAnswers} setAnswers={setQuestionnaireAnswers} /> : null}
         {currentStep === 4 ? (
-          <StepFour isAnalyzed={isAnalyzed} score={score} risk={risk} sleepHours={sleepHours} workHours={workHours} onEditAnswers={() => setCurrentStep(3)} />
+          <StepFour
+            isAnalyzed={isAnalyzed}
+            score={score}
+            risk={risk}
+            sleepHours={sleepHours}
+            workHours={workHours}
+            onEditAnswers={() => setCurrentStep(3)}
+            alreadySubmitted={alreadyCheckedIn}
+            note={note}
+            warning={warning}
+          />
         ) : null}
 
         {errorText ? <p className="mt-5 text-sm text-error">{errorText}</p> : null}
