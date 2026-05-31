@@ -8,7 +8,11 @@ export interface CheckIn {
   energy_level?: number        // questionnaire score 1–10
   stress_level?: number        // questionnaire score 1–10
   burnoutScore?: number        // 0–100 (computed)
+  score_assessment?: number    // 0–100 (pure questionnaire score)
   riskLevel?: 'Rendah' | 'Sedang' | 'Tinggi' | string
+  note?: string
+  warning?: string
+  dashboardRecommendation?: string
   createdAt?: string
 }
 
@@ -19,6 +23,7 @@ export interface CreateCheckInPayload {
   energy_level?: number
   stress_level?: number
   questionnaire_answers?: number[]
+  score_assessment?: number
 }
 
 // ─── Journal ──────────────────────────────────────────────────────────────────

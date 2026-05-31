@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { DashboardLayout } from '../components/layout/DashboardLayout'
-import { saveJournalEntry, analyzeJournalText } from '../services/historyService'
+import { createJournal, getLocalDateString } from '../services/trackingService'
 
 function JournalPromptCard({ currentDate }: { currentDate: string }) {
   return (
@@ -162,27 +162,31 @@ export function JournalPage() {
     [],
   )
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (journalText.trim().length < 10 || isAnalyzing) {
       return
     }
 
     setIsAnalyzing(true)
-    window.setTimeout(() => {
-      const result = analyzeJournalText(journalText)
-      setAnalysisResult(result)
-      setIsAnalyzing(false)
-      setIsAnalyzed(true)
+    try {
+      const todayStr = getLocalDateString()
+      const result = await createJournal({
+        date: todayStr,
+        content: journalText,
+      })
 
-      // Automatically save to local history / localStorage
-      saveJournalEntry(
-        journalText,
-        result.emotion,
-        result.insight,
-        result.recommendation
-      )
+      setAnalysisResult({
+        emotion: result.detectedEmotion || 'Netral',
+        insight: result.insight || 'Terima kasih telah menulis jurnal hari ini.',
+        recommendation: result.recommendation || 'Lanjutkan aktivitas sehat dan luangkan waktu untuk relaksasi.',
+      })
+      setIsAnalyzed(true)
       setIsSaved(true)
-    }, 1200)
+    } catch (error) {
+      console.error('Failed to analyze and save journal:', error)
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   return (

@@ -5,7 +5,7 @@
 ---
 
 ## 🔐 Authentication
-Semua endpoint selain Register, Login, dan Verify OTP membutuhkan Header:  
+Semua endpoint selain Register, Login, Verify OTP, dan Resend OTP membutuhkan Header:  
 `Authorization: Bearer <your_jwt_token>`
 
 ### 1. Register User
@@ -22,7 +22,7 @@ Mendaftarkan akun baru dan mengirimkan 6-digit OTP ke email.
 ```
 
 ### 2. Verify OTP
-Memvalidasi akun menggunakan kode OTP dari email.
+Memvalidasi akun menggunakan kode OTP dari email. Mengembalikan JWT token jika verifikasi sukses.
 - **Method**: `POST`
 - **URL**: `/auth/verify-otp`
 - **Body (JSON)**:
@@ -34,7 +34,7 @@ Memvalidasi akun menggunakan kode OTP dari email.
 ```
 
 ### 3. Login
-Mendapatkan JWT Token untuk mengakses fitur lainnya.
+Mendapatkan JWT Token untuk mengakses fitur lainnya. Jika user belum terverifikasi, akan mengembalikan status error 401 dan mengirimkan OTP baru ke email.
 - **Method**: `POST`
 - **URL**: `/auth/login`
 - **Body (JSON)**:
@@ -45,32 +45,26 @@ Mendapatkan JWT Token untuk mengakses fitur lainnya.
 }
 ```
 
----
-
-## 📊 Daily Tracking
-*(Membutuhkan Token)*
-
-### 4. Create Daily Check-in
+### 4. Resend OTP
+Mengirim ulang kode OTP ke email yang belum terverifikasi.
 - **Method**: `POST`
-- **URL**: `/tracking/checkin`
+- **URL**: `/auth/resend-otp`
 - **Body (JSON)**:
 ```json
 {
-  "sleep_hours": 7.5,
-  "work_hours": 8.0,
-  "energy_level": 8,
-  "stress_level": 3
+  "email": "user@example.com"
 }
 ```
 
-### 5. Get All Check-ins
-- **Method**: `GET`
-- **URL**: `/tracking/checkins`
+---
 
-### 6. Create Journal Entry
-Menganalisis emosi jurnal dengan ML model dan men-generate pesan motivasi menggunakan Gemini.
+## 📝 Journaling
+*(Membutuhkan Token)*
+
+### 5. Create Journal Entry
+Menganalisis emosi dari teks jurnal harian dengan model ML dan secara otomatis membuat pesan motivasi/empati dari Gemini untuk setiap emosi yang terdeteksi.
 - **Method**: `POST`
-- **URL**: `/tracking/journal`
+- **URL**: `/journal`
 - **Body (JSON)**:
 ```json
 {
@@ -80,7 +74,7 @@ Menganalisis emosi jurnal dengan ML model dan men-generate pesan motivasi menggu
 - **Response (JSON)**:
 ```json
 {
-  "success": true,
+  "status": "success",
   "message": "Journal entry created",
   "data": {
     "id": 12,
@@ -97,143 +91,79 @@ Menganalisis emosi jurnal dengan ML model dan men-generate pesan motivasi menggu
       {
         "emotion": "sadness",
         "message": "Pesan dukungan psikologis dari Gemini..."
-      },
-      {
-        "emotion": "anger",
-        "message": "Pesan dukungan psikologis dari Gemini..."
       }
     ]
   }
 }
 ```
 
-### 7. Get All Journals
-Mengambil semua data jurnal lengkap dengan data emosi dan pesan motivasi.
+### 6. Get All Journals
+Mengambil semua data jurnal lengkap dengan data emosi dan pesan motivasi. Mendukung parameter query `limit`.
 - **Method**: `GET`
-- **URL**: `/tracking/journals`
+- **URL**: `/journal`
+- **Query Parameters**:
+  - `limit` (optional): Jumlah jurnal teratas/terakhir yang ingin diambil (contoh: `limit=5`)
 
 ---
 
-## 🧠 Assessment & Prediction
+## 📊 Burnout Prediction & Checkin
 *(Membutuhkan Token)*
 
-### 8. Create Self Assessment & Burnout Prediction
-Menyimpan data kuesioner mandiri dan sekaligus menjalankan perhitungan prediksi burnout menggunakan model ML forecasting.
+### 7. Create Daily Check-in & Prediction
+Mencatat durasi tidur, durasi kerja, dan skor assessment/id kuesioner. Endpoint ini memanggil model ML untuk memprediksi tingkat burnout (Low/Moderate/High) serta Gemini AI untuk mendapatkan rekomendasi kesehatan mental.
 - **Method**: `POST`
-- **URL**: `/assessment/assessment`
+- **URL**: `/predict`
 - **Body (JSON)**:
 ```json
 {
-  "total_score": 75,
-  "answers": {
-    "q1": "Sering",
-    "q2": "Kadang-kadang",
-    "q3": "Jarang",
-    "q4": "Sering",
-    "q5": "Sering",
-    "q6": "Kadang-kadang",
-    "q7": "Jarang",
-    "q8": "Kadang-kadang",
-    "q9": "Jarang",
-    "q10": "Sering"
-  }
+  "sleep_hours": 7.5,
+  "work_hours": 8.0,
+  "score_assessment": 75,
+  "assessment_id": 1
 }
 ```
 - **Response (JSON)**:
 ```json
 {
-  "success": true,
-  "message": "Assessment saved and prediction calculated successfully",
+  "status": "success",
+  "message": "Check-in recorded successfully",
   "data": {
-    "assessment": {
-      "total_score": 75,
-      "answers": {
-        "q1": "Sering",
-        "q2": "Kadang-kadang",
-        "q3": "Jarang",
-        "q4": "Sering",
-        "q5": "Sering",
-        "q6": "Kadang-kadang",
-        "q7": "Jarang",
-        "q8": "Kadang-kadang",
-        "q9": "Jarang",
-        "q10": "Sering"
-      }
-    },
-    "prediction": {
-      "prediction_score": 75.0,
-      "risk_level": "High",
-      "recommendation": "Burnout kamu hari ini cukup tinggi (75.0)...",
-      "details": {
-        "final_burnout_score": 75.0,
-        "final_burnout_level": "High",
-        "weighting_type": "questionnaire only",
-        "trend_warning": {
-          "trend": "insufficient_data",
-          "warning": "Burnout kamu hari ini cukup tinggi..."
-        }
-      }
+    "id": 1,
+    "user_id": 12,
+    "sleep_hours": 7.5,
+    "work_hours": 8.0,
+    "score_assessment": 75,
+    "final_burnout_score": 68.5,
+    "final_burnout_level": "Moderate",
+    "note": "Rekomendasi pencegahan burnout...",
+    "warning": "Peringatan tren burnout...",
+    "dashboard_recommendation": "Rekomendasi keseluruhan...",
+    "created_at": "2026-05-28T12:00:00.000Z",
+    "ml_payload": {
+      "work_hours_list": [8.0],
+      "sleep_hours_list": [7.5],
+      "burnout_score_list": [0],
+      "questionnaire_score": 75.0
     }
   }
 }
 ```
 
-### 9. Get All Assessments
+### 8. Get All Check-ins & Predictions
+Mengambil semua riwayat daily check-in dan hasil prediksi burnout secara descending.
 - **Method**: `GET`
-- **URL**: `/assessment/assessments`
-
-### 10. Create Burnout Prediction (Legacy / Standalone)
-*(Digunakan jika ingin menghitung ulang prediksi burnout secara terpisah tanpa input assessment baru)*
-- **Method**: `POST`
-- **URL**: `/assessment/prediction`
-- **Body (JSON - Optional)**:
-```json
-{
-  "questionnaire_score": 55.0
-}
-```
-*(Catatan: Jika `questionnaire_score` tidak dikirim, backend akan mengambil dari self assessment terakhir user).*
-
-- **Response (JSON)**:
-```json
-{
-  "success": true,
-  "message": "Prediction recorded successfully",
-  "data": {
-    "prediction_score": 53.65,
-    "risk_level": "Moderate",
-    "recommendation": "Burnout kamu perlahan naik...",
-    "details": {
-      "behavior_prediction_score": 52.3,
-      "questionnaire_score": 55.0,
-      "final_burnout_score": 53.65,
-      "final_burnout_level": "Moderate",
-      "difference": 2.7,
-      "weighting_type": "balanced weighting",
-      "note": "Data 3 hari...",
-      "trend_warning": {
-        "trend": "increasing",
-        "avg_delta": 1.2,
-        "streak_up": 2,
-        "severity": "medium",
-        "warning": "Burnout kamu perlahan naik..."
-      }
-    }
-  }
-}
-```
-
-### 11. Get All Predictions
-- **Method**: `GET`
-- **URL**: `/assessment/predictions`
+- **URL**: `/predict`
 
 ---
 
 ## 🛠 Utility
-### 12. Health Check
-- **Method**: `GET`
-- **URL**: `/health`
 
-### 13. Profile (Test Token)
+### 9. Profile (Check JWT Token Profile Data)
+Mendapatkan detail profil user yang terautentikasi berdasarkan JWT token.
 - **Method**: `GET`
 - **URL**: `/profile`
+
+### 10. Health Check
+Memastikan server API berjalan lancar.
+- **Method**: `GET`
+- **URL**: `/health`

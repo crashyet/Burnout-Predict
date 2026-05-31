@@ -2,34 +2,7 @@ const { sql } = require("@databases/pg");
 const db = require("../config/db");
 const { successResponse, errorResponse } = require("../utils/response");
 
-// --- Daily Checkins ---
-const createCheckin = async (req, res) => {
-  const { sleep_hours, work_hours, energy_level, stress_level } = req.body;
-  const userId = req.user.id;
-
-  try {
-    await db.query(sql`
-      INSERT INTO daily_checkins (user_id, sleep_hours, work_hours, energy_level, stress_level)
-      VALUES (${userId}, ${sleep_hours}, ${work_hours}, ${energy_level}, ${stress_level})
-    `);
-    return successResponse(res, "Check-in recorded successfully", null, 201);
-  } catch (err) {
-    console.error(err);
-    return errorResponse(res, "Failed to record check-in");
-  }
-};
-
-const getCheckins = async (req, res) => {
-  const userId = req.user.id;
-  try {
-    const checkins = await db.query(sql`SELECT * FROM daily_checkins WHERE user_id = ${userId} ORDER BY created_at DESC`);
-    return successResponse(res, "Check-ins retrieved", checkins);
-  } catch (err) {
-    return errorResponse(res, "Failed to retrieve check-ins");
-  }
-};
-
-// --- Journals ---
+// --- Create Journal Entry ---
 const createJournal = async (req, res) => {
   const { content } = req.body;
   const userId = req.user.id;
@@ -67,8 +40,8 @@ const createJournal = async (req, res) => {
 
     // Insert journal
     const journalResult = await db.query(sql`
-      INSERT INTO journals (user_id, content, mood_expression, sentiment_score)
-      VALUES (${userId}, ${content}, NULL, NULL)
+      INSERT INTO journals (user_id, content)
+      VALUES (${userId}, ${content})
       RETURNING id
     `);
     const journalId = journalResult[0].id;
@@ -157,6 +130,7 @@ const createJournal = async (req, res) => {
   }
 };
 
+// --- Get All Journals ---
 const getJournals = async (req, res) => {
   const userId = req.user.id;
   const limit = (req.query && req.query.limit) ? parseInt(req.query.limit, 10) : null;
@@ -179,8 +153,19 @@ const getJournals = async (req, res) => {
         emotionObj[e.emotion] = parseFloat(e.probability);
       });
 
+      // Determine dominant emotion
+      let dominantEmotion = "neutral";
+      let maxProb = 0;
+      for (const [em, prob] of Object.entries(emotionObj)) {
+        if (prob > maxProb) {
+          maxProb = prob;
+          dominantEmotion = em;
+        }
+      }
+
       return {
         ...journal,
+        mood_expression: dominantEmotion,
         emotions: emotionObj,
         motivations: motivations.map(m => ({
           emotion: m.emotion,
@@ -196,4 +181,4 @@ const getJournals = async (req, res) => {
   }
 };
 
-module.exports = { createCheckin, getCheckins, createJournal, getJournals };
+module.exports = { createJournal, getJournals };

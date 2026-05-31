@@ -1,11 +1,15 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "NodeJS Backend API Docs",
+    "title": "NodeJS Burnout Predict Backend API Docs",
     "version": "1.0.0",
-    "description": "API untuk mengelola data user, daily check-in, pengisian kuesioner assessment, riwayat prediksi burnout, dan integrasi dengan ML & Gemini."
+    "description": "API untuk mengelola data user, daily check-in (yang berintegrasi dengan ML & Gemini untuk prediksi burnout), log jurnal harian, dan kesehatan sistem."
   },
   "servers": [
+    {
+      "url": "https://burnout-predict.vercel.app/api/v1",
+      "description": "Production Server"
+    },
     {
       "url": "http://localhost:5000/api/v1",
       "description": "Local Development Server"
@@ -30,7 +34,7 @@
       "post": {
         "tags": ["Authentication"],
         "summary": "Pendaftaran Pengguna Baru",
-        "description": "Membuat akun pengguna baru. Membutuhkan verifikasi OTP setelah pendaftaran.",
+        "description": "Membuat akun pengguna baru. Mengirimkan 6-digit kode OTP ke email pengguna untuk verifikasi.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -50,7 +54,134 @@
         },
         "responses": {
           "201": {
-            "description": "Registrasi berhasil, silakan verifikasi OTP yang dikirimkan ke email Anda."
+            "description": "Registrasi berhasil, OTP dikirim.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "success" },
+                    "message": { "type": "string", "example": "User registered. Please check your email for the 6-digit OTP." },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "email": { "type": "string", "example": "user@example.com" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email sudah terdaftar atau format input tidak valid."
+          }
+        }
+      }
+    },
+    "/auth/verify-otp": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Verifikasi Akun dengan OTP",
+        "description": "Memverifikasi email pendaftaran menggunakan 6 digit kode OTP. Mengembalikan token JWT jika berhasil.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "user@example.com" },
+                  "otp": { "type": "string", "example": "123456", "description": "Bisa dikirim sebagai 'otp' atau 'otp_code'" },
+                  "otp_code": { "type": "string", "example": "123456" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verifikasi akun berhasil, JWT token dikembalikan.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "success" },
+                    "message": { "type": "string", "example": "Email verified successfully." },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "token": { "type": "string", "example": "eyJhbGciOiJIUzI1Ni..." },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "integer", "example": 12 },
+                            "name": { "type": "string", "example": "Adhitya" },
+                            "email": { "type": "string", "example": "user@example.com" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "OTP salah atau kedaluwarsa."
+          }
+        }
+      }
+    },
+    "/auth/resend-otp": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "Kirim Ulang Kode OTP",
+        "description": "Mengirimkan ulang kode OTP baru ke email terdaftar yang belum terverifikasi.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": { "type": "string", "format": "email", "example": "user@example.com" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP baru berhasil dikirim.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "success" },
+                    "message": { "type": "string", "example": "A new OTP has been sent to your email." },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "email": { "type": "string", "example": "user@example.com" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Permintaan tidak valid atau email sudah terverifikasi."
+          },
+          "404": {
+            "description": "Email tidak terdaftar."
           }
         }
       }
@@ -59,7 +190,7 @@
       "post": {
         "tags": ["Authentication"],
         "summary": "Masuk / Login Pengguna",
-        "description": "Melakukan autentikasi menggunakan email dan password untuk mendapatkan token JWT.",
+        "description": "Melakukan autentikasi menggunakan email dan password untuk mendapatkan token JWT. Jika akun belum diverifikasi, akan dikirimkan OTP baru dan mengembalikan error status 401 dengan informasi unverified.",
         "security": [],
         "requestBody": {
           "required": true,
@@ -89,7 +220,36 @@
                     "data": {
                       "type": "object",
                       "properties": {
-                        "token": { "type": "string", "example": "eyJhbGciOiJIUzI1Ni..." }
+                        "token": { "type": "string", "example": "eyJhbGciOiJIUzI1Ni..." },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "integer", "example": 12 },
+                            "name": { "type": "string", "example": "Adhitya" },
+                            "email": { "type": "string", "example": "user@example.com" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Kredensial salah ATAU akun belum terverifikasi.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "error" },
+                    "message": { "type": "string", "example": "Please verify your email before logging in" },
+                    "errors": {
+                      "type": "object",
+                      "properties": {
+                        "unverified": { "type": "boolean", "example": true },
+                        "email": { "type": "string", "example": "user@example.com" }
                       }
                     }
                   }
@@ -100,80 +260,11 @@
         }
       }
     },
-    "/auth/verify-otp": {
+    "/journal": {
       "post": {
-        "tags": ["Authentication"],
-        "summary": "Verifikasi Akun dengan OTP",
-        "description": "Memverifikasi email pendaftaran menggunakan 6 digit kode OTP.",
-        "security": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["email", "otp"],
-                "properties": {
-                  "email": { "type": "string", "format": "email", "example": "user@example.com" },
-                  "otp": { "type": "string", "example": "123456" }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Verifikasi akun berhasil."
-          }
-        }
-      }
-    },
-    "/tracking/checkin": {
-      "post": {
-        "tags": ["Daily Tracking"],
-        "summary": "Catat Daily Check-in",
-        "description": "Mencatat jam tidur, jam kerja, tingkat energi, dan stres harian user.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["sleep_hours", "work_hours", "energy_level", "stress_level"],
-                "properties": {
-                  "sleep_hours": { "type": "number", "format": "float", "example": 7.5 },
-                  "work_hours": { "type": "number", "format": "float", "example": 8.0 },
-                  "energy_level": { "type": "integer", "minimum": 1, "maximum": 10, "example": 8 },
-                  "stress_level": { "type": "integer", "minimum": 1, "maximum": 10, "example": 3 }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Check-in berhasil dicatat."
-          }
-        }
-      }
-    },
-    "/tracking/checkins": {
-      "get": {
-        "tags": ["Daily Tracking"],
-        "summary": "Ambil Semua Riwayat Check-in",
-        "description": "Mengembalikan semua catatan check-in dari user yang sedang login.",
-        "responses": {
-          "200": {
-            "description": "Daftar riwayat check-in."
-          }
-        }
-      }
-    },
-    "/tracking/journal": {
-      "post": {
-        "tags": ["Daily Tracking"],
-        "summary": "Buat Jurnal Harian Baru",
-        "description": "Menganalisis emosi dari teks jurnal harian dengan ML model dan secara otomatis membuat pesan motivasi/empati dari Gemini untuk setiap emosi yang dominan.",
+        "tags": ["Journaling"],
+        "summary": "Buat Entri Jurnal Harian Baru",
+        "description": "Menyimpan catatan jurnal harian. Teks jurnal akan dianalisis menggunakan model ML untuk mendeteksi emosi, dan Gemini AI digunakan untuk memicu respon motivasi/empati sesuai emosi dominan yang terdeteksi.",
         "requestBody": {
           "required": true,
           "content": {
@@ -208,7 +299,10 @@
                           "type": "object",
                           "properties": {
                             "sadness": { "type": "number", "example": 0.954 },
-                            "anger": { "type": "number", "example": 0.035 }
+                            "anger": { "type": "number", "example": 0.035 },
+                            "fear": { "type": "number", "example": 0.011 },
+                            "happy": { "type": "number", "example": 0.0 },
+                            "love": { "type": "number", "example": 0.0 }
                           }
                         },
                         "motivations": {
@@ -229,91 +323,59 @@
             }
           }
         }
-      }
-    },
-    "/tracking/journals": {
+      },
       "get": {
-        "tags": ["Daily Tracking"],
-        "summary": "Ambil Semua Riwayat Jurnal",
-        "description": "Mengambil daftar seluruh jurnal harian user beserta emosi dan pesannya. Mendukung filter `limit` untuk mengambil jurnal terakhir.",
+        "tags": ["Journaling"],
+        "summary": "Ambil Riwayat Jurnal Pengguna",
+        "description": "Mengambil daftar seluruh jurnal harian pengguna beserta hasil deteksi emosi dan motivasinya. Mendukung limitasi data.",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "Jumlah jurnal yang ingin diambil (misal: 1 untuk mengambil jurnal teratas/terakhir saja)",
+            "description": "Batas jumlah jurnal terakhir yang ingin ditampilkan.",
             "required": false,
             "schema": {
               "type": "integer",
-              "example": 1
+              "example": 5
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Daftar jurnal berhasil diambil."
-          }
-        }
-      }
-    },
-    "/assessment/assessment": {
-      "post": {
-        "tags": ["Assessment & Prediction"],
-        "summary": "Submit Kuesioner Assessment & Hitung Prediksi Burnout",
-        "description": "Menyimpan kuesioner self-assessment user (10 pertanyaan) dan secara otomatis menghitung prediksi burnout berdasarkan histori tidur, jam kerja, dan prediksi sebelumnya menggunakan model ML forecasting.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["total_score", "answers"],
-                "properties": {
-                  "total_score": { "type": "integer", "example": 75 },
-                  "answers": {
-                    "type": "object",
-                    "properties": {
-                      "q1": { "type": "string", "example": "Sering" },
-                      "q2": { "type": "string", "example": "Kadang-kadang" },
-                      "q3": { "type": "string", "example": "Jarang" },
-                      "q4": { "type": "string", "example": "Sering" },
-                      "q5": { "type": "string", "example": "Sering" },
-                      "q6": { "type": "string", "example": "Kadang-kadang" },
-                      "q7": { "type": "string", "example": "Jarang" },
-                      "q8": { "type": "string", "example": "Kadang-kadang" },
-                      "q9": { "type": "string", "example": "Jarang" },
-                      "q10": { "type": "string", "example": "Sering" }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Assessment berhasil disimpan dan prediksi dihitung.",
+            "description": "Daftar jurnal berhasil diambil.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "status": { "type": "string", "example": "success" },
-                    "message": { "type": "string", "example": "Assessment saved and prediction calculated successfully" },
+                    "message": { "type": "string", "example": "Journals retrieved" },
                     "data": {
-                      "type": "object",
-                      "properties": {
-                        "assessment": {
-                          "type": "object",
-                          "properties": {
-                            "total_score": { "type": "integer", "example": 75 }
-                          }
-                        },
-                        "prediction": {
-                          "type": "object",
-                          "properties": {
-                            "prediction_score": { "type": "number", "example": 75.0 },
-                            "risk_level": { "type": "string", "example": "High" },
-                            "recommendation": { "type": "string", "example": "Burnout kamu hari ini cukup tinggi..." }
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer", "example": 12 },
+                          "user_id": { "type": "integer", "example": 12 },
+                          "content": { "type": "string", "example": "Hari ini beban kerja saya..." },
+                          "created_at": { "type": "string", "format": "date-time", "example": "2026-05-28T12:00:00.000Z" },
+                          "mood_expression": { "type": "string", "example": "sadness" },
+                          "emotions": {
+                            "type": "object",
+                            "properties": {
+                              "sadness": { "type": "number", "example": 0.954 },
+                              "anger": { "type": "number", "example": 0.035 }
+                            }
+                          },
+                          "motivations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "emotion": { "type": "string", "example": "sadness" },
+                                "message": { "type": "string", "example": "Sangat wajar jika kamu merasa lelah..." }
+                              }
+                            }
                           }
                         }
                       }
@@ -326,31 +388,23 @@
         }
       }
     },
-    "/assessment/assessments": {
-      "get": {
-        "tags": ["Assessment & Prediction"],
-        "summary": "Ambil Semua Riwayat Assessment",
-        "description": "Mengambil seluruh riwayat pengisian kuesioner assessment oleh user.",
-        "responses": {
-          "200": {
-            "description": "Daftar riwayat assessment."
-          }
-        }
-      }
-    },
-    "/assessment/prediction": {
+    "/predict": {
       "post": {
-        "tags": ["Assessment & Prediction"],
-        "summary": "Buat Prediksi Burnout Baru (Standalone/Legacy)",
-        "description": "Menghitung ulang prediksi burnout secara terpisah dari pengisian assessment.",
+        "tags": ["Burnout Prediction & Checkin"],
+        "summary": "Catat Daily Check-in & Hitung Prediksi Burnout",
+        "description": "Mencatat jam tidur, jam kerja, dan skor assessment/id kuesioner. Memanggil model ML untuk memprediksi tingkat burnout (Low/Moderate/High) serta Gemini AI untuk mendapatkan rekomendasi kesehatan mental.",
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["sleep_hours", "work_hours"],
                 "properties": {
-                  "questionnaire_score": { "type": "number", "example": 55.0 }
+                  "sleep_hours": { "type": "number", "format": "float", "example": 7.5 },
+                  "work_hours": { "type": "number", "format": "float", "example": 8.0 },
+                  "score_assessment": { "type": "integer", "description": "Skor kuesioner mandiri", "example": 75 },
+                  "assessment_id": { "type": "integer", "description": "ID assessment (opsional)", "example": 1 }
                 }
               }
             }
@@ -358,19 +412,84 @@
         },
         "responses": {
           "201": {
-            "description": "Prediksi burnout berhasil dibuat."
+            "description": "Check-in berhasil disimpan dan hasil prediksi burnout dihasilkan.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "success" },
+                    "message": { "type": "string", "example": "Check-in recorded successfully" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "example": 1 },
+                        "user_id": { "type": "integer", "example": 12 },
+                        "sleep_hours": { "type": "number", "example": 7.5 },
+                        "work_hours": { "type": "number", "example": 8.0 },
+                        "score_assessment": { "type": "integer", "example": 75 },
+                        "final_burnout_score": { "type": "number", "example": 68.5 },
+                        "final_burnout_level": { "type": "string", "example": "Moderate" },
+                        "note": { "type": "string", "example": "Rekomendasi pencegahan burnout..." },
+                        "warning": { "type": "string", "example": "Peringatan tren burnout..." },
+                        "dashboard_recommendation": { "type": "string", "example": "Rekomendasi keseluruhan..." },
+                        "created_at": { "type": "string", "format": "date-time", "example": "2026-05-28T12:00:00.000Z" },
+                        "ml_payload": {
+                          "type": "object",
+                          "properties": {
+                            "work_hours_list": { "type": "array", "items": { "type": "number" }, "example": [8.0] },
+                            "sleep_hours_list": { "type": "array", "items": { "type": "number" }, "example": [7.5] },
+                            "burnout_score_list": { "type": "array", "items": { "type": "number" }, "example": [0] },
+                            "questionnaire_score": { "type": "number", "example": 75.0 }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
-      }
-    },
-    "/assessment/predictions": {
+      },
       "get": {
-        "tags": ["Assessment & Prediction"],
-        "summary": "Ambil Semua Riwayat Prediksi Burnout",
-        "description": "Mengambil seluruh riwayat prediksi burnout beserta score, risk level, dan rekomendasi trend.",
+        "tags": ["Burnout Prediction & Checkin"],
+        "summary": "Ambil Riwayat Daily Check-in & Prediksi",
+        "description": "Mengembalikan semua catatan check-in beserta hasil analisis burnout dari pengguna yang sedang login secara descending.",
         "responses": {
           "200": {
-            "description": "Daftar riwayat prediksi."
+            "description": "Daftar riwayat check-in dan prediksi berhasil diambil.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "success" },
+                    "message": { "type": "string", "example": "Check-ins retrieved" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer", "example": 1 },
+                          "user_id": { "type": "integer", "example": 12 },
+                          "sleep_hours": { "type": "number", "example": 7.5 },
+                          "work_hours": { "type": "number", "example": 8.0 },
+                          "score_assessment": { "type": "integer", "example": 75 },
+                          "assessment_score": { "type": "integer", "example": 75 },
+                          "final_burnout_score": { "type": "number", "example": 68.5 },
+                          "final_burnout_level": { "type": "string", "example": "Moderate" },
+                          "note": { "type": "string", "example": "Rekomendasi..." },
+                          "warning": { "type": "string", "example": "Peringatan..." },
+                          "dashboard_recommendation": { "type": "string", "example": "Rekomendasi dashboard..." },
+                          "created_at": { "type": "string", "format": "date-time", "example": "2026-05-28T12:00:00.000Z" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -379,10 +498,33 @@
       "get": {
         "tags": ["User Profile"],
         "summary": "Ambil Data Profil User",
-        "description": "Mendapatkan detail profil user yang terautentikasi.",
+        "description": "Mendapatkan detail profil user yang terautentikasi berdasarkan JWT token.",
         "responses": {
           "200": {
-            "description": "Data profil user."
+            "description": "Data profil user berhasil diakses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string", "example": "success" },
+                    "message": { "type": "string", "example": "Profile data accessed" },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": { "type": "integer", "example": 12 },
+                            "email": { "type": "string", "example": "user@example.com" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -395,7 +537,18 @@
         "security": [],
         "responses": {
           "200": {
-            "description": "Server berjalan OK."
+            "description": "Server berjalan OK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "OK", "example": "OK" },
+                    "message": { "type": "string", "example": "API is running" }
+                  }
+                }
+              }
+            }
           }
         }
       }

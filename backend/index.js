@@ -3,8 +3,8 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require("./src/routes/authRoutes");
-const trackingRoutes = require("./src/routes/trackingRoutes");
-const assessmentRoutes = require("./src/routes/assessmentRoutes");
+const journalRoutes = require("./src/routes/journalRoutes");
+const predictRoutes = require("./src/routes/predictRoutes");
 const authMiddleware = require("./src/middleware/authMiddleware");
 const { successResponse } = require("./src/utils/response");
 
@@ -51,8 +51,8 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(null, swaggerOptions));
 
 // Routes
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/tracking", trackingRoutes);
-app.use("/api/v1/assessment", assessmentRoutes);
+app.use("/api/v1/journal", journalRoutes);
+app.use("/api/v1/predict", predictRoutes);
 
 // Protected route example
 app.get("/api/v1/profile", authMiddleware, (req, res) => {

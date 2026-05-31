@@ -1,20 +1,10 @@
-const nodemailer = require("nodemailer");
+const https = require("https");
 require("dotenv").config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_PORT == 465, 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
 const sendVerificationEmail = async (email, otp) => {
-  const mailOptions = {
-    from: `"Burnout Predict" <${process.env.EMAIL_FROM}>`,
-    to: email,
+  const data = JSON.stringify({
+    from: `Burnout Predict <${process.env.EMAIL_FROM}>`,
+    to: [email],
     subject: "Your Verification Code - Burnout Predict",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
@@ -28,9 +18,40 @@ const sendVerificationEmail = async (email, otp) => {
         <p style="font-size: 12px; color: #888; text-align: center;">&copy; 2026 Burnout Predict. All rights reserved.</p>
       </div>
     `,
+  });
+
+  const options = {
+    hostname: "api.resend.com",
+    port: 443,
+    path: "/emails",
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${process.env.EMAIL_PASS}`,
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(data),
+    },
   };
 
-  await transporter.sendMail(mailOptions);
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      let body = "";
+      res.on("data", (chunk) => (body += chunk));
+      res.on("end", () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(body);
+        } else {
+          reject(new Error(`Resend API returned status code ${res.statusCode}: ${body}`));
+        }
+      });
+    });
+
+    req.on("error", (error) => {
+      reject(error);
+    });
+
+    req.write(data);
+    req.end();
+  });
 };
 
 module.exports = { sendVerificationEmail };

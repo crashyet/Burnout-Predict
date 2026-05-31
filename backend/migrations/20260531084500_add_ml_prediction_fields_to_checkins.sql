@@ -1,0 +1,5 @@
+ALTER TABLE daily_checkins
+  ADD COLUMN IF NOT EXISTS final_burnout_score DECIMAL(5,2),
+  ADD COLUMN IF NOT EXISTS final_burnout_level VARCHAR(50),
+  ADD COLUMN IF NOT EXISTS note TEXT,
+  ADD COLUMN IF NOT EXISTS warning TEXT;
