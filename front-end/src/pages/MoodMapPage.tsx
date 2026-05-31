@@ -382,7 +382,7 @@ function SelectedDateDetail({
                     Senang: 'bg-tertiary-fixed text-tertiary border-tertiary-fixed/30',
                     Netral: 'bg-secondary-container text-on-secondary-fixed-variant border-secondary-container/30',
                   }
-                  const badgeClass = EMOTION_BADGE_STYLE[journal.detectedEmotion] || 'bg-surface-container text-outline border-outline-variant/30'
+                  const badgeClass = (journal.detectedEmotion ? EMOTION_BADGE_STYLE[journal.detectedEmotion] : null) || 'bg-surface-container text-outline border-outline-variant/30'
                   return (
                     <div key={journal.id} className="bg-surface-container-low/40 rounded-xl p-4 border border-outline-variant/10 flex flex-col gap-2">
                       <p className="font-body-md text-[14px] text-on-surface leading-relaxed italic">
@@ -393,7 +393,7 @@ function SelectedDateDetail({
                           {journal.detectedEmotion}
                         </span>
                         <span className="text-[10px] text-on-surface-variant font-medium">
-                          {new Date(journal.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
+                          {new Date(journal.createdAt || journal.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
                         </span>
                       </div>
                       {journal.insight && (

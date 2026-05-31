@@ -17,6 +17,7 @@ import type {
   LoginResponse,
   ProfileResponse,
   AuthResult,
+  VerifyOtpResponse,
 } from '../types/auth'
 import type { User, RegisteredUser, AuthSession } from '../types/user'
 

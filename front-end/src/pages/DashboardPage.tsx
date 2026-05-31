@@ -515,7 +515,7 @@ export function DashboardPage() {
     if (!todayCheckIn) return null
     
     const score = todayCheckIn.score_assessment ?? todayCheckIn.burnoutScore ?? 0
-    const risk = score > 70 ? 'Tinggi' : score >= 40 ? 'Sedang' : 'Rendah'
+    const risk: 'Rendah' | 'Sedang' | 'Tinggi' = score > 70 ? 'Tinggi' : score >= 40 ? 'Sedang' : 'Rendah'
 
     return {
       sleepHours: todayCheckIn.sleep_hours,

@@ -37,16 +37,20 @@ export interface VerifyOtpResponse {
 }
 
 export interface LoginResponse {
-  token: string
-  user: {
-    id?: string
-    name: string
-    email: string
+  status: string
+  message: string
+  data: {
+    token: string
+    user: {
+      id?: string | number
+      name: string
+      email: string
+    }
   }
 }
 
 export interface ProfileResponse {
-  id?: string
+  id?: string | number
   name: string
   email: string
 }
