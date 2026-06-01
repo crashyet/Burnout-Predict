@@ -108,17 +108,24 @@ const createCheckin = async (req, res) => {
     // 4. Retrieve the user's highest/dominant emotion for today
     let todayEmotion = "Netral";
     try {
-      const now = new Date();
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      // Get current date in Asia/Jakarta (WIB) timezone, formatting as YYYY-MM-DD
+      const jakartaDateStr = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Jakarta",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(new Date());
+
+      const todayStart = `${jakartaDateStr} 00:00:00.000`;
+      const todayEnd = `${jakartaDateStr} 23:59:59.999`;
       
       const journalEmotions = await db.query(sql`
         SELECT je.emotion, je.probability
         FROM journal_emotions je
         JOIN journals j ON je.journal_id = j.id
         WHERE j.user_id = ${userId}
-          AND j.created_at >= ${todayStart.toISOString()}
-          AND j.created_at <= ${todayEnd.toISOString()}
+          AND j.created_at >= ${todayStart}
+          AND j.created_at <= ${todayEnd}
         ORDER BY je.probability DESC
         LIMIT 1
       `);
