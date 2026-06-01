@@ -245,6 +245,21 @@ function TodayCheckInSummary({
 }
 
 function WeeklyTrendChart({ checkins }: { checkins: CheckIn[] }) {
+  const formatLocalDate = (dateObj: Date): string => {
+    try {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Jakarta",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(dateObj)
+    } catch {
+      const offset = dateObj.getTimezoneOffset()
+      const localDate = new Date(dateObj.getTime() - (offset * 60 * 1000))
+      return localDate.toISOString().split('T')[0]
+    }
+  }
+
   const getDayLabel = (dateStr: string): string => {
     try {
       const date = new Date(dateStr)
@@ -260,15 +275,12 @@ function WeeklyTrendChart({ checkins }: { checkins: CheckIn[] }) {
   for (let i = 6; i >= 0; i--) {
     const d = new Date()
     d.setDate(d.getDate() - i)
-    const dateStr = d.toISOString().split('T')[0]
+    const dateStr = formatLocalDate(d)
     
-    const c = checkins.find((checkin) => {
-      const cDate = checkin.createdAt ? checkin.createdAt.split('T')[0] : checkin.date
-      return cDate === dateStr
-    })
+    const c = checkins.find((checkin) => checkin.date === dateStr)
     
     chartData.push({
-      day: getDayLabel(d.toISOString()),
+      day: getDayLabel(dateStr),
       // value: c ? (c.score_assessment ?? c.burnoutScore ?? 0) : 0,
       value: c ? (c.burnoutScore ?? c.score_assessment ?? 0) : 0,
       isEmpty: !c
@@ -475,10 +487,7 @@ export function DashboardPage() {
   
   // 1. Find if today's check-in exists
   const todayCheckIn = useMemo(() => {
-    return checkins.find((c) => {
-      const cDate = c.createdAt ? c.createdAt.split('T')[0] : c.date
-      return cDate === todayStr
-    }) || null
+    return checkins.find((c) => c.date === todayStr) || null
   }, [checkins, todayStr])
 
   // 2. Tomorrow's prediction

@@ -412,10 +412,7 @@ export function DailyCheckInPage() {
       try {
         const checkins = await getCheckIns()
         const todayStr = getLocalDateString()
-        const todayCheckIn = checkins.find((c) => {
-          const cDate = c.createdAt ? c.createdAt.split('T')[0] : c.date
-          return cDate === todayStr
-        })
+        const todayCheckIn = checkins.find((c) => c.date === todayStr)
 
         if (todayCheckIn) {
           setSleepHours(todayCheckIn.sleep_hours)
