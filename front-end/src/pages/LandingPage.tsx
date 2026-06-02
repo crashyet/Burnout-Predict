@@ -1,18 +1,17 @@
-﻿import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 function LandingNavbar() {
   return (
     <nav className="fixed top-0 z-50 w-full bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-sm shadow-primary/5 transition-all duration-300">
       <div className="flex justify-between items-center w-full px-container-margin py-4 max-w-7xl mx-auto">
         <div className="text-headline-md font-headline-md font-bold text-primary dark:text-primary">
-  BurnoutLens
-</div>
+          BurnoutLens
+        </div>
         <div className="hidden md:flex gap-8 items-center">
-          <a className="font-body-md text-body-md text-primary dark:text-primary-fixed-dim font-bold border-b-2 border-primary" href="#">Beranda</a>
-          <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Fitur</a>
-          <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Cara Kerja</a>
-          <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Manfaat</a>
-          <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Tentang</a>
+          <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#">Beranda</a>
+          <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#Burnout">Burnout</a>
+          <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#cara-kerja">Cara Kerja</a>
+          <a className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors" href="#fitur">Fitur</a>
         </div>
         <div className="flex gap-4 items-center">
           <Link to="/login" className="px-6 py-2 rounded-full border border-primary text-primary font-label-md hover:bg-primary/5 transition-all duration-300 active:scale-95 inline-block">Masuk</Link>
@@ -34,17 +33,24 @@ function HeroSection() {
           <div className="space-y-8">
             <div className="space-y-4">
               <h1 className="font-headline-xl text-headline-xl lg:text-5xl leading-tight text-on-surface">
-                Lihat Tanda <span className="text-gradient-primary">Burnout</span> Sebelum Terasa Berat
+                Sebelum Lelah Menjadi <span className="text-gradient-primary">Burnout</span>, Kenali Batas Dirimu Hari Ini.
               </h1>
               <p className="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
-                BurnoutLens membantu kamu memahami pola tidur, beban aktivitas, emosi harian, dan risiko burnout melalui check-in, jurnal reflektif, dan insight AI.
+                BurnoutLens membantu kamu melakukan Daily Check-In, menulis Daily Journal, melihat prediksi burnout esok hari, dan memantau mood mapping bulanan.
               </p>
             </div>
             <div className="flex flex-wrap gap-4">
               <Link to="/register" className="px-8 py-4 bg-primary text-on-primary rounded-full font-label-md text-lg shadow-xl shadow-primary/25 hover:shadow-primary/40 transition-all active:scale-95">
-                Mulai Pantau Hari Ini
+                Mulai Check-In
               </Link>
-              <button className="px-8 py-4 bg-surface-container text-primary rounded-full font-label-md text-lg hover:bg-surface-container-high transition-all active:scale-95 flex items-center gap-2" type="button">
+              <button
+                onClick={() => {
+                  const el = document.getElementById('cara-kerja');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-8 py-4 bg-surface-container text-primary rounded-full font-label-md text-lg hover:bg-surface-container-high transition-all active:scale-95 flex items-center gap-2"
+                type="button"
+              >
                 <span className="material-symbols-outlined">play_circle</span>
                 Lihat Cara Kerja
               </button>
@@ -130,32 +136,32 @@ function HeroSection() {
 
 function ProblemSection() {
   return (
-    <section className="py-section-gap px-container-margin max-w-7xl mx-auto">
+    <section id="Burnout" className="scroll-mt-24 py-section-gap px-container-margin max-w-7xl mx-auto">
       <div className="text-center space-y-4 mb-16">
-        <h2 className="font-headline-lg text-headline-lg text-on-surface">Burnout Sering Datang Pelan-Pelan</h2>
-        <p className="font-body-md text-on-surface-variant max-w-2xl mx-auto">Kadang tubuh dan pikiran sudah memberi sinyal, tapi kita baru sadar saat semuanya terasa terlalu berat.</p>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface">Merasa Lelah Padahal Baru Saja Bangun Tidur?</h2>
+        <p className="font-body-md text-on-surface-variant max-w-2xl mx-auto">Burnout sering kali muncul perlahan. Kenali tanda-tandanya sebelum aktivitas harian terasa semakin berat.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="p-8 bg-surface-container-lowest rounded-[2rem] shadow-sm hover:shadow-md transition-all duration-500 group border border-surface-container">
           <div className="w-14 h-14 bg-primary-fixed text-primary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-            <span className="material-symbols-outlined text-3xl">bedtime</span>
+            <span className="material-symbols-outlined text-3xl">battery_alert</span>
           </div>
-          <h3 className="font-headline-md text-on-surface mb-3">Tidur mulai berantakan</h3>
-          <p className="text-on-surface-variant font-body-md">Kualitas istirahat yang menurun menjadi indikator awal beban mental berlebih.</p>
+          <h3 className="font-headline-md text-on-surface mb-3">Lelah Fisik & Mental</h3>
+          <p className="text-on-surface-variant font-body-md">Energi terasa terkuras sepanjang hari, bahkan setelah tidur atau beristirahat.</p>
         </div>
         <div className="p-8 bg-surface-container-lowest rounded-[2rem] shadow-sm hover:shadow-md transition-all duration-500 group border border-surface-container">
           <div className="w-14 h-14 bg-secondary-fixed text-secondary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-            <span className="material-symbols-outlined text-3xl">center_focus_weak</span>
+            <span className="material-symbols-outlined text-3xl">trending_down</span>
           </div>
-          <h3 className="font-headline-md text-on-surface mb-3">Fokus makin sulit</h3>
-          <p className="text-on-surface-variant font-body-md">Tugas sederhana terasa melelahkan dan pikiran mudah teralihkan ke hal lain.</p>
+          <h3 className="font-headline-md text-on-surface mb-3">Kehilangan Motivasi</h3>
+          <p className="text-on-surface-variant font-body-md">Tugas yang biasanya bisa dikerjakan mulai terasa berat dan sulit dimulai.</p>
         </div>
         <div className="p-8 bg-surface-container-lowest rounded-[2rem] shadow-sm hover:shadow-md transition-all duration-500 group border border-surface-container">
           <div className="w-14 h-14 bg-tertiary-fixed text-tertiary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
             <span className="material-symbols-outlined text-3xl">mood_bad</span>
           </div>
-          <h3 className="font-headline-md text-on-surface mb-3">Emosi terasa naik turun</h3>
-          <p className="text-on-surface-variant font-body-md">Respon terhadap stress harian menjadi lebih sensitif dari biasanya.</p>
+          <h3 className="font-headline-md text-on-surface mb-3">Emosi Lebih Sensitif</h3>
+          <p className="text-on-surface-variant font-body-md">Kamu jadi lebih mudah cemas, frustrasi, atau kewalahan oleh hal-hal kecil.</p>
         </div>
       </div>
     </section>
@@ -164,52 +170,42 @@ function ProblemSection() {
 
 function FlowSection() {
   return (
-    <section className="py-section-gap bg-surface-container-low overflow-hidden">
+    <section id="cara-kerja" className="scroll-mt-24 py-section-gap bg-surface-container-low overflow-hidden">
       <div className="px-container-margin max-w-7xl mx-auto">
         <div className="text-center space-y-4 mb-20">
-          <h2 className="font-headline-lg text-headline-lg text-on-surface">Satu Tempat untuk Memahami Kondisi Harianmu</h2>
+          <h2 className="font-headline-lg text-headline-lg text-on-surface">Pantau Kondisimu dalam Alur yang Sederhana</h2>
         </div>
-        <div className="relative flex flex-col md:flex-row justify-between items-center gap-12">
-          <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-y-1/2" />
-
-          <div className="relative z-10 flex flex-col items-center gap-4 group">
-            <div className="w-20 h-20 rounded-full bg-white shadow-xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+          <div className="relative z-10 flex flex-col items-center text-center p-8 bg-white rounded-[2rem] border border-surface-container shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 group">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-300">
               <span className="material-symbols-outlined text-3xl">assignment_turned_in</span>
             </div>
-            <div className="text-center">
-              <h4 className="font-label-md text-on-surface">Check-In Harian</h4>
-              <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">30 Detik</p>
-            </div>
+            <h4 className="font-label-md text-on-surface mb-2 font-bold">1. Daily Check-In</h4>
+            <p className="text-body-sm text-on-surface-variant text-sm leading-relaxed">Catat jam tidur, jam kerja, dan jawab pertanyaan singkat tentang kondisimu hari ini.</p>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center gap-4 group">
-            <div className="w-20 h-20 rounded-full bg-white shadow-xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
+          <div className="relative z-10 flex flex-col items-center text-center p-8 bg-white rounded-[2rem] border border-surface-container shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 group">
+            <div className="w-16 h-16 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center mb-6 group-hover:bg-secondary group-hover:text-white transition-all duration-300">
               <span className="material-symbols-outlined text-3xl">edit_note</span>
             </div>
-            <div className="text-center">
-              <h4 className="font-label-md text-on-surface">Tulis Jurnal</h4>
-              <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Refleksi Bebas</p>
-            </div>
+            <h4 className="font-label-md text-on-surface mb-2 font-bold">2. Daily Journal</h4>
+            <p className="text-body-sm text-on-surface-variant text-sm leading-relaxed">Tulis refleksi harian agar pola emosi dan pemicu stres lebih mudah dikenali.</p>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center gap-4 group">
-            <div className="w-20 h-20 rounded-full bg-primary shadow-xl flex items-center justify-center text-white scale-110">
-              <span className="material-symbols-outlined text-4xl">psychology</span>
+          <div className="relative z-10 flex flex-col items-center text-center p-8 bg-white rounded-[2rem] border border-surface-container shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 group">
+            <div className="w-16 h-16 rounded-2xl bg-tertiary/10 text-tertiary flex items-center justify-center mb-6 group-hover:bg-tertiary group-hover:text-white transition-all duration-300">
+              <span className="material-symbols-outlined text-3xl">psychology</span>
             </div>
-            <div className="text-center">
-              <h4 className="font-label-md text-primary font-bold">AI Membaca Pola</h4>
-              <p className="text-[10px] text-primary uppercase tracking-widest">Insight Instan</p>
-            </div>
+            <h4 className="font-label-md text-on-surface mb-2 font-bold">3. Prediksi Burnout Esok Hari</h4>
+            <p className="text-body-sm text-on-surface-variant text-sm leading-relaxed">Lihat estimasi risiko burnout untuk esok hari berdasarkan data check-in dan jurnal.</p>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center gap-4 group">
-            <div className="w-20 h-20 rounded-full bg-white shadow-xl flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-500">
+          <div className="relative z-10 flex flex-col items-center text-center p-8 bg-white rounded-[2rem] border border-surface-container shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 group">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-white transition-all duration-300">
               <span className="material-symbols-outlined text-3xl">calendar_month</span>
             </div>
-            <div className="text-center">
-              <h4 className="font-label-md text-on-surface">Mood Terpetakan</h4>
-              <p className="text-[10px] text-on-surface-variant uppercase tracking-widest">Data Bulanan</p>
-            </div>
+            <h4 className="font-label-md text-on-surface mb-2 font-bold">4. Mood Mapping</h4>
+            <p className="text-body-sm text-on-surface-variant text-sm leading-relaxed">Pantau riwayat emosi dan skor burnout dalam tampilan bulanan yang mudah dibaca.</p>
           </div>
         </div>
       </div>
@@ -219,77 +215,129 @@ function FlowSection() {
 
 function DetailedFeatures() {
   return (
-    <section className="py-section-gap px-container-margin max-w-7xl mx-auto">
+    <section id="fitur" className="scroll-mt-24 py-section-gap px-container-margin max-w-7xl mx-auto">
       <div className="text-center space-y-4 mb-20">
-        <h2 className="font-headline-lg text-headline-lg text-on-surface">Fitur yang Membantu Kamu Lebih Sadar Diri</h2>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface">Fitur Utama untuk Kesadaran Diri</h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Card 1: Daily Check-In */}
         <div className="group relative bg-white rounded-[2.5rem] p-10 shadow-sm border border-surface-container overflow-hidden hover:shadow-xl transition-all duration-700">
           <div className="relative z-10 flex flex-col h-full justify-between">
-            <div>
-              <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6"><span className="material-symbols-outlined">checklist</span></div>
-              <h3 className="font-headline-md text-on-surface mb-4">Check-In Harian</h3>
-              <p className="font-body-md text-on-surface-variant mb-8">Catat jam tidur, jam kerja, dan tingkat kelelahan untuk melihat pola burnout harian. Antarmuka minimalis membantu kamu fokus tanpa distraksi.</p>
+            <div className="mb-6">
+              <div className="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined">checklist</span>
+              </div>
+              <h3 className="font-headline-md text-on-surface mb-4">Daily Check-In</h3>
+              <p className="font-body-md text-on-surface-variant">
+                Catat jam tidur, jam kerja, dan jawab pertanyaan singkat untuk melihat kondisi burnout harianmu.
+              </p>
             </div>
-            <img
-              alt="Check-In"
-              className="rounded-2xl h-48 w-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh4dv59yXvDQnzyCX_9AAJVN2ns9svOY_-X4saiMVQ1qRbYyxhAJPHWavOGRBGjrEzdvSQ_albm5IZbkYHiu4Zbhj7Bo4-zoDS5GfzPf98VNs99ftAK3IsxPg8YqP0VBZIljGYra8wN-YbeFI0X1vsl5FHWvv5w6bqnEmMujKFH8iLHNwMC_cD1ReIYBd0nYNirW1C8EyZG7C3iOlQ6HOhFZvJHLTUzHneDgpUZSpZWafQ-3jIuGDmkRbXchNrXksNoruRLVrlrHqL"
-            />
-          </div>
-        </div>
 
-        <div className="group relative bg-white rounded-[2.5rem] p-10 shadow-sm border border-surface-container overflow-hidden hover:shadow-xl transition-all duration-700">
-          <div className="relative z-10 flex flex-col h-full justify-between">
-            <div>
-              <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center mb-6"><span className="material-symbols-outlined">auto_awesome</span></div>
-              <h3 className="font-headline-md text-on-surface mb-4">Analisis Jurnal AI</h3>
-              <p className="font-body-md text-on-surface-variant mb-8">Tulis perasaanmu, lalu sistem membaca dua emosi dominan dari jurnal harian. Temukan korelasi antara aktivitas dan perasaanmu secara otomatis.</p>
-            </div>
-            <div className="bg-surface-container-low rounded-2xl p-6 border-l-4 border-secondary">
-              <p className="italic text-secondary mb-4">"Hari ini terasa berat karena meeting yang beruntun..."</p>
-              <div className="flex gap-2">
-                <span className="px-3 py-1 bg-secondary text-white rounded-full text-xs">Kewalahan</span>
-                <span className="px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full text-xs">Butuh Istirahat</span>
+            {/* Preview UI */}
+            <div className="bg-surface-container-low/50 rounded-2xl p-4 border border-outline-variant/10 space-y-3">
+              <div className="flex justify-between items-center text-[10px] font-bold text-on-surface-variant">
+                <span>METRIK HARI INI</span>
+                <span className="material-symbols-outlined text-sm">check_circle</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div className="bg-white rounded-xl p-2.5 border border-outline-variant/10 shadow-sm">
+                  <p className="text-[10px] text-on-surface-variant">Jam Tidur</p>
+                  <p className="text-sm font-extrabold text-on-surface">7.5 Jam</p>
+                </div>
+                <div className="bg-white rounded-xl p-2.5 border border-outline-variant/10 shadow-sm">
+                  <p className="text-[10px] text-on-surface-variant">Jam Kerja</p>
+                  <p className="text-sm font-extrabold text-on-surface">8 Jam</p>
+                </div>
+                <div className="bg-white rounded-xl p-2.5 border border-outline-variant/10 shadow-sm col-span-2 flex justify-between items-center px-3">
+                  <div>
+                    <p className="text-[10px] text-on-surface-variant text-left">Skor Burnout</p>
+                    <p className="text-xs font-extrabold text-on-surface text-left">45 / 100</p>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200/50">Risiko Sedang</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Card 2: Daily Journal */}
         <div className="group relative bg-white rounded-[2.5rem] p-10 shadow-sm border border-surface-container overflow-hidden hover:shadow-xl transition-all duration-700">
           <div className="relative z-10 flex flex-col h-full justify-between">
-            <div>
-              <div className="w-12 h-12 bg-error/10 text-error rounded-xl flex items-center justify-center mb-6"><span className="material-symbols-outlined">speed</span></div>
-              <h3 className="font-headline-md text-on-surface mb-4">Prediksi Burnout</h3>
-              <p className="font-body-md text-on-surface-variant mb-8">Lihat skor burnout hari ini dan prediksi kondisi untuk besok secara lebih mudah dipahami. Sistem kami memberi peringatan dini sebelum kelelahan memuncak.</p>
+            <div className="mb-6">
+              <div className="w-12 h-12 bg-secondary/10 text-secondary rounded-xl flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined">auto_awesome</span>
+              </div>
+              <h3 className="font-headline-md text-on-surface mb-4">Daily Journal</h3>
+              <p className="font-body-md text-on-surface-variant">
+                Tulis refleksi harian untuk membantu mengenali emosi, pemicu stres, dan pola aktivitas yang memengaruhi kondisimu.
+              </p>
             </div>
-            <div className="flex items-end gap-2 h-32">
-              <div className="w-full bg-primary/10 rounded-t-lg h-1/2" />
-              <div className="w-full bg-primary/20 rounded-t-lg h-2/3" />
-              <div className="w-full bg-primary/40 rounded-t-lg h-1/3" />
-              <div className="w-full bg-primary/60 rounded-t-lg h-3/4" />
-              <div className="w-full bg-primary rounded-t-lg h-full animate-pulse" />
-              <div className="w-full bg-surface-container rounded-t-lg h-1/2" />
-              <div className="w-full bg-surface-container rounded-t-lg h-1/3" />
+
+            {/* Preview UI */}
+            <div className="bg-surface-container-low/50 rounded-2xl p-4 border border-outline-variant/10 space-y-3">
+              <div className="flex justify-between items-center text-[10px] font-bold text-on-surface-variant">
+                <span>REFLEKSI JURNAL</span>
+                <span className="material-symbols-outlined text-sm">edit_note</span>
+              </div>
+              <div className="bg-white rounded-xl p-3 border border-outline-variant/10 shadow-sm space-y-2">
+                <p className="text-[11px] text-on-surface-variant italic leading-relaxed">
+                  "Hari ini pekerjaan sangat padat... merasa sedikit lelah."
+                </p>
+                <div className="flex justify-between items-center pt-2 border-t border-outline-variant/5">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-surface-container-high text-on-primary-container border border-outline-variant/30">Emosi: Lelah</span>
+                  <span className="text-[9px] text-on-surface-variant">17:30 WIB</span>
+                </div>
+              </div>
+              <div className="bg-primary/5 rounded-xl p-3 border border-primary/10 flex gap-2 items-start">
+                <span className="material-symbols-outlined text-primary text-xs shrink-0 mt-0.5">tips_and_updates</span>
+                <p className="text-[10px] text-on-surface-variant leading-relaxed">
+                  <span className="font-bold text-primary block">Rekomendasi AI:</span>
+                  Prioritaskan tidur 7-8 jam malam ini dan luangkan waktu 15 menit untuk relaksasi.
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Card 3: Prediksi Burnout Esok Hari */}
         <div className="group relative bg-white rounded-[2.5rem] p-10 shadow-sm border border-surface-container overflow-hidden hover:shadow-xl transition-all duration-700">
           <div className="relative z-10 flex flex-col h-full justify-between">
-            <div>
-              <div className="w-12 h-12 bg-tertiary/10 text-tertiary rounded-xl flex items-center justify-center mb-6"><span className="material-symbols-outlined">calendar_view_month</span></div>
-              <h3 className="font-headline-md text-on-surface mb-4">Pemetaan Mood Bulanan</h3>
-              <p className="font-body-md text-on-surface-variant mb-8">Pantau mood dalam kalender bulanan agar pola emosi lebih terlihat. Menemukan hari-hari pemicu stres menjadi lebih mudah dengan visualisasi data.</p>
+            <div className="mb-6">
+              <div className="w-12 h-12 bg-error/10 text-error rounded-xl flex items-center justify-center mb-6">
+                <span className="material-symbols-outlined">speed</span>
+              </div>
+              <h3 className="font-headline-md text-on-surface mb-4">Prediksi Burnout Esok Hari</h3>
+              <p className="font-body-md text-on-surface-variant">
+                Lihat estimasi risiko burnout untuk esok hari berdasarkan data check-in dan jurnal yang kamu isi.
+              </p>
             </div>
-            <div className="grid grid-cols-7 gap-2">
-              <div className="aspect-square bg-primary/20 rounded-md" />
-              <div className="aspect-square bg-primary/40 rounded-md" />
-              <div className="aspect-square bg-primary/10 rounded-md" />
-              <div className="aspect-square bg-tertiary/40 rounded-md" />
-              <div className="aspect-square bg-primary/80 rounded-md" />
-              <div className="aspect-square bg-primary/30 rounded-md" />
-              <div className="aspect-square bg-primary/10 rounded-md" />
+
+            {/* Preview UI */}
+            <div className="bg-surface-container-low/50 rounded-2xl p-4 border border-outline-variant/10 space-y-3">
+              <div className="flex justify-between items-center text-[10px] font-bold text-on-surface-variant">
+                <span>PREDIKSI ESOK HARI</span>
+                <span className="material-symbols-outlined text-sm">psychology</span>
+              </div>
+              <div className="bg-white rounded-xl p-3 border border-outline-variant/10 shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-on-surface-variant">Estimasi Risiko</p>
+                  <p className="text-sm font-extrabold text-on-surface">Sedang (55%)</p>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600">
+                  <span className="material-symbols-outlined text-lg">sentiment_neutral</span>
+                </div>
+              </div>
+              <div className="bg-error-container/20 rounded-xl p-2.5 border border-error/15 flex gap-2 items-start">
+                <span className="material-symbols-outlined text-error text-xs shrink-0 mt-0.5">warning</span>
+                <p className="text-[9.5px] text-on-surface-variant leading-relaxed">
+                  <span className="font-bold text-error block">Tren Warning:</span>
+                  Kurang tidur dalam 2 hari terakhir terdeteksi.
+                </p>
+              </div>
+              <div className="bg-white rounded-xl p-2.5 border border-outline-variant/10 text-[9.5px] text-on-surface-variant leading-relaxed">
+                <span className="font-bold text-secondary block mb-0.5">Rekomendasi:</span>
+                Kurangi aktivitas malam ini dan pastikan tidur cukup.
+              </div>
             </div>
           </div>
         </div>
@@ -300,7 +348,7 @@ function DetailedFeatures() {
 
 function CalendarSection() {
   return (
-    <section className="py-section-gap px-container-margin max-w-7xl mx-auto overflow-hidden">
+    <section id="kalender" className="py-section-gap px-container-margin max-w-7xl mx-auto overflow-hidden">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         <div className="lg:col-span-7 relative">
           <div className="glass-effect rounded-[3rem] p-8 shadow-2xl shadow-primary/5">
@@ -394,11 +442,11 @@ function CtaSection() {
           <div className="absolute -bottom-1/2 -right-1/4 w-[600px] h-[600px] bg-white/5 rounded-full animate-[pulse_20s_infinite]" />
         </div>
         <div className="relative z-10 max-w-2xl mx-auto space-y-8">
-          <h2 className="font-headline-xl text-headline-xl lg:text-5xl">Mulai Pahami Kondisi Dirimu Hari Ini</h2>
-          <p className="font-body-lg text-on-primary/80">Satu check-in kecil bisa membantu kamu mengenali pola besar dalam keseharianmu. Bergabunglah dengan ribuan orang yang sudah mulai memprioritaskan diri mereka.</p>
+          <h2 className="font-headline-xl text-headline-xl lg:text-5xl">Jangan Tunggu Sampai Benar-benar Lelah.</h2>
+          <p className="font-body-lg text-on-primary/80">Mulai pantau energi, emosi, dan pola burnout-mu dari hari ini.</p>
           <div className="flex flex-wrap justify-center gap-4 pt-4">
             <Link to="/register" className="px-10 py-5 bg-white text-primary rounded-full font-bold text-lg shadow-2xl hover:bg-surface-bright transition-all active:scale-95">Daftar Sekarang</Link>
-            <Link to="/login" className="px-10 py-5 border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all active:scale-95">Masuk</Link>
+            <Link to="/login" className="px-10 py-5 border border-white/30 text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all active:scale-95">Masuk ke Akun</Link>
           </div>
         </div>
       </div>
@@ -411,12 +459,7 @@ function LandingFooter() {
     <footer className="bg-surface-container-low py-section-gap">
       <div className="flex flex-col items-center justify-center gap-base px-container-margin w-full max-w-7xl mx-auto">
         <div className="font-headline-md text-primary font-bold mb-4">BurnoutLens</div>
-        <div className="flex gap-8 mb-8">
-          <a className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-all" href="#">Kebijakan Privasi</a>
-          <a className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-all" href="#">Syarat & Ketentuan</a>
-          <a className="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-all" href="#">Bantuan</a>
-        </div>
-        <p className="font-label-sm text-label-sm text-on-surface-variant/60">© 2024 BurnoutLens. Menjaga Kesejahteraan Mental Anda.</p>
+        <p className="font-label-sm text-label-sm text-on-surface-variant/60">© 2026 BurnoutLens. Capstone Project Dicoding x DBS Foundation</p>
       </div>
     </footer>
   )
