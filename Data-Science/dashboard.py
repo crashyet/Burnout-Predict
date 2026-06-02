@@ -284,14 +284,14 @@ elif page == "❓ Business Questions":
                 total_per_emo = total_per_emo.sort_values('count', ascending=False)
                 col1, col2 = st.columns(2)
                 with col1:
-                    fig = px.bar(total_per_emo, x='emotion', y='count', color='emotion',
+                    fig1 = px.bar(total_per_emo, x='emotion', y='count', color='emotion',
                                  color_discrete_map=COLORS, title="Jumlah Data per Kelas Emosi", text='persen')
-                    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-                    fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                    fig1.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                       font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
                     # st.plotly_chart(fig, use_container_width=True)
                     st.plotly_chart(
-                        fig,
+                        fig1,
                         use_container_width=True,
                         key="business_questions_bq1_jumlah_emosi"
                     )
