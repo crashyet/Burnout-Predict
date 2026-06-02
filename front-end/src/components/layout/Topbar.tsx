@@ -4,9 +4,11 @@ import { getCurrentUser, logoutUser } from '../../services/authService'
 
 type TopbarProps = {
   title?: string
+  onToggleSidebar?: () => void
+  isSidebarOpen?: boolean
 }
 
-export function Topbar({ title = 'Dashboard' }: TopbarProps) {
+export function Topbar({ title = 'Dashboard', onToggleSidebar, isSidebarOpen = false }: TopbarProps) {
   const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -43,8 +45,20 @@ export function Topbar({ title = 'Dashboard' }: TopbarProps) {
 
   return (
     <header className="flex justify-between items-center px-container-margin py-4 w-full bg-surface/80 backdrop-blur-md shadow-sm shadow-primary/5 sticky top-0 z-40 border-b border-surface-container">
-      <h1 className="text-headline-md font-headline-md font-bold text-on-surface">{title}</h1>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onToggleSidebar}
+          className="lg:hidden p-2 hover:bg-primary/5 rounded-full transition-colors flex items-center justify-center"
+          aria-label="Buka menu sidebar"
+          aria-expanded={isSidebarOpen}
+          type="button"
+        >
+          <span className="material-symbols-outlined text-on-surface">menu</span>
+        </button>
+        <h1 className="text-headline-md font-headline-md font-bold text-on-surface">{title}</h1>
+      </div>
       <div className="flex items-center gap-4 text-on-surface-variant relative" ref={dropdownRef}>
+
         <button className="p-2 hover:bg-primary/5 rounded-full transition-all active:scale-90 duration-100" type="button">
           <span className="material-symbols-outlined">notifications</span>
         </button>
