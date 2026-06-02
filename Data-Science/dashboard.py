@@ -289,7 +289,12 @@ elif page == "❓ Business Questions":
                     fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
                     fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                       font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-                    st.plotly_chart(fig, use_container_width=True)
+                    # st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(
+                        fig,
+                        use_container_width=True,
+                        key="bq1_jumlah_emosi"
+                    )
                 with col2:
                     fig2 = px.bar(total_per_emo, x='persen', y='emotion', orientation='h',
                                   color='emotion', color_discrete_map=COLORS,
@@ -297,7 +302,12 @@ elif page == "❓ Business Questions":
                     fig2.add_vline(x=20, line_dash="dash", line_color="gray", annotation_text="Ideal 20%")
                     fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                        font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-                    st.plotly_chart(fig2, use_container_width=True)
+                    # st.plotly_chart(fig2, use_container_width=True)
+                    st.plotly_chart(
+                        fig2,
+                        use_container_width=True,
+                        key="bq1_proporsi_emosi"
+                    )
                 insight("⚠️ <strong>Insight BQ-1:</strong> 'happy' mendominasi (30.28%), 'love' paling sedikit (10.92%) → rasio imbalance <strong>2.77:1</strong>. Ditangani dengan class_weight='balanced' saat training.")
 
             elif "BQ-2" in bq:
@@ -309,13 +319,23 @@ elif page == "❓ Business Questions":
                     fig.update_traces(texttemplate='%{text:,}', textposition='outside')
                     fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                       font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-                    st.plotly_chart(fig, use_container_width=True)
+                    # st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(
+                        fig,
+                        use_container_width=True,
+                        key="bq2_volume_sumber"
+                    )
                 with col2:
                     fig2 = px.pie(total_per_src, names='source', values='count',
                                   color_discrete_sequence=PALETTE, title="Proporsi per Sumber")
                     fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                        font_color='#ccd6f6', title_font_color='#e94560')
-                    st.plotly_chart(fig2, use_container_width=True)
+                    # st.plotly_chart(fig2, use_container_width=True)
+                    st.plotly_chart(
+                        fig2,
+                        use_container_width=True,
+                        key="bq2_pie_sumber"
+                    )
                 insight("📌 <strong>Insight BQ-2:</strong> English Archive mendominasi (58.1%, 19.281 baris). Dataset lokal Indonesia = 41.9%. Dominasi English perlu diwaspadai agar model tidak bias.")
 
             elif "BQ-3" in bq:
@@ -324,7 +344,12 @@ elif page == "❓ Business Questions":
                                  category_orders={'emotion':['anger','fear','happy','love','sadness']})
                 fig_box.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                       font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-                st.plotly_chart(fig_box, use_container_width=True)
+                # st.plotly_chart(fig_box, use_container_width=True)
+                st.plotly_chart(
+                    fig_box,
+                    use_container_width=True,
+                    key="bq3_boxplot_panjang_teks"
+                )
                 insight("📌 <strong>Insight BQ-3:</strong> Median 12–18 kata/teks. P95 ≈ 25–30 kata → digunakan sebagai <strong>max_length tokenizer NLP</strong>.")
 
             elif "BQ-4" in bq:
@@ -333,7 +358,12 @@ elif page == "❓ Business Questions":
                                   title="Jam Tidur vs Burnout Score (r = −0.1331)", opacity=0.5)
                 fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                    font_color='#ccd6f6', title_font_color='#e94560')
-                st.plotly_chart(fig2, use_container_width=True)
+                # st.plotly_chart(fig2, use_container_width=True)
+                st.plotly_chart(
+                    fig2,
+                    use_container_width=True,
+                    key="bq4_sleep_vs_burnout"
+                )
                 insight("📌 <strong>Insight BQ-4:</strong> Pearson r = −0.1331, p ≈ 0.000 → negatif signifikan tapi <em>lemah secara praktis</em>. Sleep_hours saja tidak cukup sebagai prediktor tunggal.")
 
             elif "BQ-5" in bq:
@@ -346,7 +376,12 @@ elif page == "❓ Business Questions":
                              title="Korelasi Fitur vs Burnout Score")
                 fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                   font_color='#ccd6f6', title_font_color='#e94560')
-                st.plotly_chart(fig, use_container_width=True)
+                # st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(
+                    fig,
+                    use_container_width=True,
+                    key="bq5_korelasi_fitur"
+                )
                 insight("📌 <strong>Insight BQ-5:</strong> Tiga fitur jam kerja paling dominan: work_hours_per_day (+0.492), overwork_flag (+0.394), work_rest_ratio (+0.361). Beban kerja adalah prediktor burnout yang dominan.")
 
             elif "BQ-6" in bq:
@@ -366,7 +401,12 @@ elif page == "❓ Business Questions":
                 fig_bq6.update_layout(barmode='group', title="Rata-rata Fitur per Burnout Level",
                                       paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                       font_color='#ccd6f6', title_font_color='#e94560')
-                st.plotly_chart(fig_bq6, use_container_width=True)
+                # st.plotly_chart(fig_bq6, use_container_width=True)
+                st.plotly_chart(
+                    fig_bq6,
+                    use_container_width=True,
+                    key="bq6_perbandingan_level"
+                )
                 insight("📌 <strong>Insight BQ-6:</strong> Setiap naik satu level: jam kerja naik ~8.5 jam/minggu, jam tidur turun ~0.4 jam/malam.")
 
             elif "BQ-7" in bq:
@@ -378,7 +418,12 @@ elif page == "❓ Business Questions":
                     fig.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
                     fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                       font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-                    st.plotly_chart(fig, use_container_width=True)
+                    # st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(
+                        fig,
+                        use_container_width=True,
+                        key="bq7_original"
+                    )
                 with col2:
                     syn = pd.DataFrame({'Level':['Low','Moderate','High'], 'Persen':[30.7,29.3,40.0]})
                     fig2 = px.bar(syn, x='Level', y='Persen', color='Level', color_discrete_map=COLORS,
@@ -386,7 +431,12 @@ elif page == "❓ Business Questions":
                     fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
                     fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                        font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-                    st.plotly_chart(fig2, use_container_width=True)
+                    # st.plotly_chart(fig2, use_container_width=True)
+                    st.plotly_chart(
+                        fig2,
+                        use_container_width=True,
+                        key="bq7_synthetic"
+                    )
                 insight("⚠️ <strong>Insight BQ-7:</strong> Sebelum: Low=87.75%, Moderate=12.21%, High=0.04%. Sesudah: ketiga kelas dalam rentang 29–40%. Kelas High dari 65 → <strong>12.781 sampel</strong> ✅")
 
             elif "BQ-8" in bq:
@@ -397,7 +447,12 @@ elif page == "❓ Business Questions":
                                      text_auto=True, aspect='auto', zmin=-1, zmax=1)
                 fig_heat.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                        font_color='#ccd6f6', title_font_color='#e94560')
-                st.plotly_chart(fig_heat, use_container_width=True)
+                # st.plotly_chart(fig_heat, use_container_width=True)
+                st.plotly_chart(
+                    fig_heat,
+                    use_container_width=True,
+                    key="bq8_heatmap"
+                )
                 insight("✅ <strong>Insight BQ-8:</strong> work_hours dan sleep_hours hampir tidak berkorelasi (r ≈ 0.004) → <strong>aman digunakan bersama</strong> dalam model LSTM.")
 
             elif "BQ-9" in bq:
@@ -414,7 +469,12 @@ elif page == "❓ Business Questions":
                                         xaxis_title="Hari ke-", yaxis_title="Burnout Score",
                                         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                         font_color='#ccd6f6', title_font_color='#e94560', height=400)
-                st.plotly_chart(fig_trend, use_container_width=True)
+                # st.plotly_chart(fig_trend, use_container_width=True)
+                st.plotly_chart(
+                    fig_trend,
+                    use_container_width=True,
+                    key="bq9_trend"
+                )
                 insight("📌 <strong>Insight BQ-9:</strong> Burnout rata-rata melewati threshold <strong>Moderate (36) di hari ke-3</strong>, lalu <strong>High (66) di hari ke-21</strong>. Lembur ≥3 hari berturut-turut → trigger notifikasi BurnoutLens.")
 
             elif "BQ-10" in bq:
@@ -433,7 +493,12 @@ elif page == "❓ Business Questions":
                 fig3.update_layout(barmode='group', title="Distribusi Level — Original vs Synthetic",
                                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                    font_color='#ccd6f6', title_font_color='#e94560', yaxis=dict(range=[0,110]))
-                st.plotly_chart(fig3, use_container_width=True)
+                # st.plotly_chart(fig3, use_container_width=True)
+                st.plotly_chart(
+                    fig3,
+                    use_container_width=True,
+                    key="bq10_original_vs_synthetic"
+                )
                 insight("✅ <strong>Insight BQ-10:</strong> Rasio imbalance dari 2.025:1 → ~1.4:1. Distribusi synthetic terbedakan jelas per level ✅")  
 
 # # ── 2. EDA BURNOUT ──────────────────────────────────────────────────
