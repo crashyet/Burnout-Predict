@@ -286,15 +286,24 @@ erDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Pengguna
-    participant FE as Frontend (UI)
-    participant BE as Backend & DB
-    participant ML as ML Model Engine
-    participant AI as Generative AI (LLM)
+    
+    box rgb(240, 248, 255) "Client / User Interface"
+        actor User as Pengguna
+        participant FE as Frontend (UI)
+    end
+    
+    box rgb(245, 255, 250) "Core Logic & Database"
+        participant BE as Backend & DB
+    end
+
+    box rgb(255, 250, 240) "AI & ML Services"
+        participant ML as ML Model Engine
+        participant AI as Generative AI (LLM)
+    end
 
     %% 1. AUTENTIKASI SECTION
-    box RGB(240, 248, 255) Autentikasi & Akses Masuk
     rect rgb(230, 240, 255)
+        Note over User, AI: 1. Autentikasi & Akses Masuk
         alt Alur Register (Belum Punya Akun)
             User->>FE: Isi Email & Password Baru -> Klik Register
             FE->>BE: Request OTP Register
@@ -320,11 +329,10 @@ sequenceDiagram
             end
         end
     end
-    end
 
     %% 2. FITUR 1: DAILY CHECK-IN
-    box RGB(255, 245, 238) Fitur 1: Daily Check-In
     rect rgb(255, 240, 230)
+        Note over User, AI: 2. Fitur 1: Daily Check-In
         User->>FE: Buka Menu Daily Check-In
         User->>FE: Isi Jam Tidur, Kerja & Kuesioner -> Klik Submit
         FE->>BE: Kirim Data Metrik Harian
@@ -339,11 +347,10 @@ sequenceDiagram
         BE-->>FE: Kirim Data Terbaru
         FE-->>User: Tampilkan Dashboard Ter-update
     end
-    end
 
     %% 3. FITUR 2: DAILY JOURNAL (DENGAN PENYIMPANAN DATA ML & GEN AI)
-    box RGB(245, 255, 250) Fitur 2: Daily Journal
     rect rgb(235, 250, 240)
+        Note over User, AI: 3. Fitur 2: Daily Journal
         User->>FE: Buka Menu Daily Journal
         User->>FE: Ketik Cerita/Keluh Kesah -> Klik Analisis
         FE->>BE: Kirim Teks Jurnal
@@ -366,11 +373,10 @@ sequenceDiagram
         BE-->>FE: Kirim Data Terbaru
         FE-->>User: Tampilkan Dashboard Ter-update
     end
-    end
 
     %% 4. FITUR 3: MOOD MAPPING
-    box RGB(255, 250, 240) Fitur 3: Mood Mapping
     rect rgb(255, 245, 225)
+        Note over User, AI: 4. Fitur 3: Mood Mapping
         User->>FE: Buka Menu Mood Mapping Bulanan
         FE->>BE: Request Data Emosi (Rentang 1 Bulan)
         BE->>BE: Query & Agregasi Data Jurnal Bulanan
@@ -380,7 +386,6 @@ sequenceDiagram
         FE-->>User: Tampilkan Visual Kalender Mood Full 1 Bulan
         User->>FE: Klik Kembali
         FE-->>User: Arahkan ke Hub Utama (Dashboard)
-    end
     end
 ```
 
