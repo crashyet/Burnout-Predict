@@ -75,6 +75,20 @@ async function parseResponse<T>(response: Response): Promise<T> {
     } catch {
       errorBody = null
     }
+
+    if (response.status === 401) {
+      const isAuthEndpoint =
+        response.url.includes('/auth/login') ||
+        response.url.includes('/auth/verify-otp') ||
+        response.url.includes('/auth/register') ||
+        response.url.includes('/auth/resend-otp')
+
+      if (!isAuthEndpoint) {
+        localStorage.removeItem('current_session')
+        window.location.href = '/login'
+      }
+    }
+
     throw createApiError(response.status, `HTTP ${response.status}: ${response.statusText}`, errorBody)
   }
   if (response.status === 204) return undefined as T

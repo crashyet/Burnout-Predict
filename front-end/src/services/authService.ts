@@ -44,6 +44,24 @@ function writeJson(key: string, value: unknown): void {
   localStorage.setItem(key, JSON.stringify(value))
 }
 
+// ─── Token Expiration Helper ──────────────────────────────────────────────────
+
+function isTokenExpired(token: string): boolean {
+  if (token === 'mock-jwt-token') return false
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return true
+    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))) as { exp?: number }
+    if (typeof payload.exp === 'number') {
+      const now = Math.floor(Date.now() / 1000)
+      return now >= payload.exp
+    }
+  } catch {
+    return true
+  }
+  return false
+}
+
 // ─── Session Management ───────────────────────────────────────────────────────
 
 export function saveSession(user: User, token?: string): void {
@@ -56,12 +74,23 @@ export function clearSession(): void {
 }
 
 export function getToken(): string | null {
-  return readJson<AuthSession>(KEYS.SESSION)?.token ?? null
+  const session = readJson<AuthSession>(KEYS.SESSION)
+  if (!session) return null
+  if (session.token && isTokenExpired(session.token)) {
+    clearSession()
+    return null
+  }
+  return session.token ?? null
 }
 
 export function getCurrentUser(): User | null {
   const session = readJson<AuthSession>(KEYS.SESSION)
-  return session?.isAuthenticated ? session.user : null
+  if (!session) return null
+  if (session.token && isTokenExpired(session.token)) {
+    clearSession()
+    return null
+  }
+  return session.isAuthenticated ? session.user : null
 }
 
 export function isAuthenticated(): boolean {
