@@ -64,7 +64,7 @@ const createJournal = async (req, res) => {
 
     for (const item of emotionsToMotivate) {
       const emotionName = item.emotion;
-      let message = `Tetap semangat dan jaga kesehatan mentalmu ya! (${emotionName})`;
+      let message = `Tetap semangat dan jaga kesehatan mentalmu ya!`;
 
       if (process.env.GEN_AI_API) {
         let retries = 3;
