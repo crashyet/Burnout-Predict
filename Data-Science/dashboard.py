@@ -336,7 +336,7 @@ elif page == "❓ Business Questions":
                 key="business_questions_bq2_pie_sumber"
             )
         insight("📌 <strong>Insight BQ-2:</strong> English Archive mendominasi (58.1%, 19.281 baris). Dataset lokal Indonesia = 41.9%. Dominasi English perlu diwaspadai agar model tidak bias.")
-
+    
     with st.expander("**BQ-3 · Distribusi panjang teks dan nilai optimal max_length tokenizer?**"):
         fig_box = px.box(df_len, x='emotion', y='word_count', color='emotion',
                          color_discrete_map=COLORS, title="Distribusi Jumlah Kata per Kelas Emosi",
@@ -349,7 +349,7 @@ elif page == "❓ Business Questions":
             key="business_questions_bq3_boxplot"
         )
         insight("📌 <strong>Insight BQ-3:</strong> Median 12–18 kata/teks. P95 ≈ 25–30 kata → digunakan sebagai <strong>max_length tokenizer NLP</strong>.")
-
+    
     with st.expander("**BQ-4 · Seberapa kuat hubungan jam tidur dan skor burnout?**"):
         fig2 = px.scatter(df_b.sample(500, random_state=1), x='sleep_hours', y='burnout_score',
                           color='burnout_level', color_discrete_map=COLORS,
@@ -362,7 +362,7 @@ elif page == "❓ Business Questions":
             key="business_questions_bq4_sleep_vs_burnout"
         )
         insight("📌 <strong>Insight BQ-4:</strong> Pearson r = −0.1331, p ≈ 0.000 → negatif signifikan tapi <em>lemah secara praktis</em>. Sleep_hours saja tidak cukup sebagai prediktor tunggal.")
-
+    
     with st.expander("**BQ-5 · Fitur mana yang lebih berpengaruh dan seberapa besar selisihnya?**"):
         corr_data = pd.DataFrame({
             'Fitur': ['work_hours_per_day','overwork_flag','work_rest_ratio','sleep_deficit','sleep_risk_flag'],
@@ -379,8 +379,8 @@ elif page == "❓ Business Questions":
             key="business_questions_bq5_korelasi"
         )
         insight("📌 <strong>Insight BQ-5:</strong> Tiga fitur jam kerja paling dominan: work_hours_per_day (+0.492), overwork_flag (+0.394), work_rest_ratio (+0.361). Beban kerja adalah prediktor burnout yang dominan.")
-
-     with st.expander("**BQ-6 · Bagaimana rata-rata jam kerja, jam tidur, dan burnout score berbeda antar level burnout dan seberapa besar selisihnya? **"):
+    
+    with st.expander("**BQ-6 · Bagaimana rata-rata jam kerja, jam tidur, dan burnout score berbeda antar level burnout dan seberapa besar selisihnya? **"):
         bq6_data = pd.DataFrame({
             'Level': ['Low','Moderate','High'],
             'Jam Kerja/Minggu': [52.06, 60.84, 69.12],
@@ -403,7 +403,7 @@ elif page == "❓ Business Questions":
             key="business_questions_bq6_perbandingan"
         )
         insight("📌 <strong>Insight BQ-6:</strong> Setiap naik satu level: jam kerja naik ~8.5 jam/minggu, jam tidur turun ~0.4 jam/malam.")
-
+    
     with st.expander("**BQ-7 · Seberapa parah imbalance dan perbandingannya setelah Synthetic Data Generation?**"):
         col1, col2 = st.columns(2)
         with col1:
@@ -431,8 +431,8 @@ elif page == "❓ Business Questions":
                 key="business_questions_bq7_synthetic"
             )
         insight("⚠️ <strong>Insight BQ-7:</strong> Sebelum: Low=87.75%, Moderate=12.21%, High=0.04%. Sesudah: ketiga kelas dalam rentang 29–40%. Kelas High dari 65 → <strong>12.781 sampel</strong> ✅")
-
-     with st.expander("**BQ-8 · Seberapa kuat hubungan antar fitur dan mana yang paling independen?**"):
+    
+    with st.expander("**BQ-8 · Seberapa kuat hubungan antar fitur dan mana yang paling independen?**"):
         num_cols = ['work_hours_per_day','sleep_hours','burnout_score','sleep_deficit','overwork_flag','dual_risk_flag']
         corr_matrix = df_b[num_cols].corr().round(3)
         fig_heat = px.imshow(corr_matrix, color_continuous_scale='RdBu_r',
@@ -446,7 +446,7 @@ elif page == "❓ Business Questions":
             key="business_questions_bq8_heatmap"
         )
         insight("✅ <strong>Insight BQ-8:</strong> work_hours dan sleep_hours hampir tidak berkorelasi (r ≈ 0.004) → <strong>aman digunakan bersama</strong> dalam model LSTM.")
-
+    
     with st.expander("**BQ-9 · Hari ke berapa burnout melewati threshold Moderate dan High dalam 30 hari?**"):
         avg_per_day = df_syn.groupby('day')['burnout_score'].mean().reset_index()
         fig_trend = go.Figure()
@@ -467,7 +467,7 @@ elif page == "❓ Business Questions":
             key="business_questions_bq9_trend"
         )
         insight("📌 <strong>Insight BQ-9:</strong> Burnout rata-rata melewati threshold <strong>Moderate (36) di hari ke-3</strong>, lalu <strong>High (66) di hari ke-21</strong>. Lembur ≥3 hari berturut-turut → trigger notifikasi BurnoutLens.")
-
+    
     with st.expander("**BQ-10 · Sejauh mana distribusi synthetic mencerminkan karakteristik anchor level asli?**"):
         compare_df = pd.DataFrame({
             'Level':          ['Low','Moderate','High'],
