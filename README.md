@@ -211,7 +211,7 @@ Burnout-Predict/
 | Layanan | Fungsi |
 |---------|--------|
 | FastAPI (Python) | Framework serving model ML |
-| Model LSTM Forecasting | Prediksi skor burnout esok hari dari time series |
+| Model GRU Forecasting | Prediksi skor burnout esok hari dari time series |
 | Model Text Classifier | Deteksi 5 emosi dari teks jurnal |
 | Google Gemini AI | Generasi rekomendasi & pesan motivasi personal |
 
