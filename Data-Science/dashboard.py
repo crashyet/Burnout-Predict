@@ -253,7 +253,8 @@ if page == "🏠 Overview":
         ))
         fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                           margin=dict(t=10,b=10,l=10,r=10), height=300)
-        st.plotly_chart(fig, use_container_width=True)
+        # st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, use_container_width=True, key="overview_chart_1")
 
   # ── 2. BUSINESS QUESTIONS ───────────────────────────────────────────
 elif page == "❓ Business Questions":
@@ -284,14 +285,14 @@ elif page == "❓ Business Questions":
                 total_per_emo = total_per_emo.sort_values('count', ascending=False)
                 col1, col2 = st.columns(2)
                 with col1:
-                    fig1 = px.bar(total_per_emo, x='emotion', y='count', color='emotion',
+                    fig = px.bar(total_per_emo, x='emotion', y='count', color='emotion',
                                  color_discrete_map=COLORS, title="Jumlah Data per Kelas Emosi", text='persen')
-                    fig1.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-                    fig1.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                    fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
+                    fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                                       font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
                     # st.plotly_chart(fig, use_container_width=True)
                     st.plotly_chart(
-                        fig1,
+                        fig,
                         use_container_width=True,
                         key="business_questions_bq1_jumlah_emosi"
                     )
@@ -501,345 +502,6 @@ elif page == "❓ Business Questions":
                 )
                 insight("✅ <strong>Insight BQ-10:</strong> Rasio imbalance dari 2.025:1 → ~1.4:1. Distribusi synthetic terbedakan jelas per level ✅")  
 
-# # ── 2. EDA BURNOUT ──────────────────────────────────────────────────
-# elif page == "📊 EDA — Burnout":
-#     st.markdown('<div class="main-header"><h1>📊 EDA — Burnout Dataset</h1><p>Exploratory Data Analysis pada 150.000 data pekerja teknologi</p></div>', unsafe_allow_html=True)
-
-#     df_b = generate_burnout_data()
-
-#     # BQ-7: Distribusi + imbalance
-#     section("BQ-7 · Distribusi & Imbalance Burnout Level (Sebelum vs Sesudah Synthetic)")
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         # Data ASLI dari notebook rev: Low=87.75%, Moderate=12.21%, High=0.04%
-#         ori = pd.DataFrame({'Level':['Low','Moderate','High'], 'Persen':[87.75,12.21,0.04]})
-#         fig = px.bar(ori, x='Level', y='Persen',
-#                      color='Level', color_discrete_map=COLORS,
-#                      title="Data Asli (sebelum synthetic)",
-#                      text='Persen')
-#         fig.update_traces(texttemplate='%{text:.2f}%', textposition='outside')
-#         fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                           font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-#         st.plotly_chart(fig, use_container_width=True)
-#     with col2:
-#         # Setelah synthetic: 29-40% (dari notebook rev: High 40%, Mod 29.3%, Low 30.7%)
-#         syn = pd.DataFrame({'Level':['Low','Moderate','High'], 'Persen':[30.7,29.3,40.0]})
-#         fig2 = px.bar(syn, x='Level', y='Persen',
-#                       color='Level', color_discrete_map=COLORS,
-#                       title="Setelah Synthetic Data Generation",
-#                       text='Persen')
-#         fig2.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-#         fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                            font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-#         st.plotly_chart(fig2, use_container_width=True)
-
-#     insight("⚠️ <strong>BQ-7 — Class Imbalance:</strong> Data asli: Low=87.75%, Moderate=12.21%, High=0.04% → rasio 2.025:1 (Low vs High). Setelah Synthetic Data Generation: ketiga kelas dalam rentang 29–40%, rasio menjadi ~1.4:1. Kelas 'High' yang semula 65 baris kini memiliki <strong>12.781 sampel</strong> ✅")
-
-#     # BQ-4 & BQ-5: Korelasi — angka DARI NOTEBOOK REV
-#     section("BQ-4 & BQ-5 · Korelasi Fitur vs Burnout Score")
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         # BQ-5 + FE insight: korelasi fitur baru vs burnout (dari notebook rev)
-#         # work_hours_per_day +0.492, overwork_flag +0.394, work_rest_ratio +0.361
-#         # sleep_deficit +0.133, sleep_risk_flag +0.107
-#         corr_data = pd.DataFrame({
-#             'Fitur': ['work_hours_per_day','overwork_flag','work_rest_ratio',
-#                       'sleep_deficit','sleep_risk_flag'],
-#             'Korelasi': [0.492, 0.394, 0.361, 0.133, 0.107],
-#         }).sort_values('Korelasi', ascending=True)
-#         fig = px.bar(corr_data, x='Korelasi', y='Fitur', orientation='h',
-#                      color='Korelasi',
-#                      color_continuous_scale=['#3498db','#e94560'],
-#                      title="BQ-5 + FE: Korelasi Fitur vs Burnout Score")
-#         fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                           font_color='#ccd6f6', title_font_color='#e94560')
-#         for i, row in corr_data.reset_index(drop=True).iterrows():
-#             fig.add_annotation(x=row['Korelasi']+0.01, y=i,
-#                                text=f"r = +{row['Korelasi']:.3f}",
-#                                showarrow=False, font=dict(color='#64ffda', size=11))
-#         st.plotly_chart(fig, use_container_width=True)
-
-#     with col2:
-#         # BQ-4: Pearson r = -0.1331 (notebook rev)
-#         fig2 = px.scatter(df_b.sample(500, random_state=1), x='sleep_hours', y='burnout_score',
-#                           color='burnout_level',
-#                           color_discrete_map=COLORS,
-#                           title="BQ-4: Jam Tidur vs Burnout Score (r = −0.1331)",
-#                           opacity=0.5)
-#         fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                            font_color='#ccd6f6', title_font_color='#e94560')
-#         st.plotly_chart(fig2, use_container_width=True)
-
-#     insight("📌 <strong>BQ-4:</strong> Pearson r = −0.1331, p ≈ 0.000 → negatif signifikan tapi <em>lemah secara praktis</em>. Dengan 150.000 sampel, hampir semua korelasi otomatis signifikan. Sleep_hours saja tidak cukup sebagai prediktor tunggal.<br><strong>BQ-5 + FE:</strong> Tiga fitur berbasis jam kerja jauh lebih kuat: work_hours_per_day (+0.492), overwork_flag (+0.394), work_rest_ratio (+0.361). Fitur tidur: sleep_deficit (+0.133) dan sleep_risk_flag (+0.107). Beban kerja adalah prediktor burnout yang <strong>dominan</strong>.")
-
-#     # BQ-6: Selisih antar level
-#     section("BQ-6 · Rata-rata Fitur per Burnout Level")
-#     # Dari notebook rev: Low=52.06 jam, Moderate=60.84, High=69.12 | sleep: Low=6.54, Mod=6.22, High=5.66
-#     bq6_data = pd.DataFrame({
-#         'Level':    ['Low','Moderate','High'],
-#         'Jam Kerja/Minggu': [52.06, 60.84, 69.12],
-#         'Jam Tidur/Malam':  [6.54,  6.22,  5.66],
-#         'Burnout Score':    [1.82,  4.25,  6.89],
-#     })
-
-#     fig_bq6 = go.Figure()
-#     for level, color in [('Low','#64ffda'),('Moderate','#ffa500'),('High','#e94560')]:
-#         row = bq6_data[bq6_data['Level']==level].iloc[0]
-#         fig_bq6.add_trace(go.Bar(
-#             name=level,
-#             x=['Jam Kerja/Minggu','Jam Tidur/Malam','Burnout Score'],
-#             y=[row['Jam Kerja/Minggu'], row['Jam Tidur/Malam'], row['Burnout Score']],
-#             marker_color=color, text=[f"{row['Jam Kerja/Minggu']:.2f}",
-#                                        f"{row['Jam Tidur/Malam']:.2f}",
-#                                        f"{row['Burnout Score']:.2f}"],
-#             textposition='outside',
-#         ))
-#     fig_bq6.update_layout(barmode='group',
-#                           title="Rata-rata Fitur per Burnout Level (dari data asli)",
-#                           paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                           font_color='#ccd6f6', title_font_color='#e94560')
-#     st.plotly_chart(fig_bq6, use_container_width=True)
-#     insight("📌 <strong>BQ-6:</strong> Setiap naik satu level: jam kerja naik ~8.5 jam/minggu, jam tidur turun ~0.4 jam/malam. Batas antar level tidak tumpang tindih → Low ≤ 3.5, Moderate 3.6–6.5, High ≥ 6.6.")
-
-#     # BQ-8: Korelasi antar fitur
-#     section("BQ-8 · Korelasi Antar Fitur (Independensi)")
-#     num_cols = ['work_hours_per_day','sleep_hours','burnout_score','sleep_deficit','overwork_flag','dual_risk_flag']
-#     corr_matrix = df_b[num_cols].corr().round(3)
-#     fig_heat = px.imshow(corr_matrix, color_continuous_scale='RdBu_r',
-#                          title="Heatmap Korelasi Antar Fitur",
-#                          text_auto=True, aspect='auto', zmin=-1, zmax=1)
-#     fig_heat.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                            font_color='#ccd6f6', title_font_color='#e94560')
-#     st.plotly_chart(fig_heat, use_container_width=True)
-#     insight("✅ <strong>BQ-8:</strong> work_hours dan sleep_hours hampir tidak berkorelasi (r ≈ 0.004) → <strong>saling melengkapi dan aman digunakan bersama</strong> dalam model. sleep_deficit = 8−sleep_hours memiliki korelasi sempurna (−1.0) → sleep_hours dihapus untuk hindari multikolinearitas pada LSTM.")
-
-#     # Feature Engineering — statistik deskriptif populasi
-#     section("🔧 Feature Engineering — Statistik Populasi")
-#     col1, col2, col3 = st.columns(3)
-#     col1.metric("% Overwork (>10.4 jam/hari)", "52.4%", "lebih dari separuh populasi")
-#     col2.metric("% Sleep Risk (≤6.2 jam)", "41.8%", "hampir separuh populasi")
-#     col3.metric("% Dual Risk (keduanya)", "21.9%", "kelompok paling rentan")
-
-#     # Fitur numerik per level: work_hours 10.4→12.2→13.8, work_rest 1.7→2.6→3.6, sleep_deficit 1.5→1.8→2.3
-#     fe_num_data = pd.DataFrame({
-#         'Level':               ['Low','Moderate','High'],
-#         'Jam Kerja/Hari':      [10.4, 12.2, 13.8],
-#         'Rasio Kerja:Istirahat':[1.7,  2.6,  3.6],
-#         'Defisit Tidur (jam)': [1.5,  1.8,  2.3],
-#     })
-#     fig_fenum = go.Figure()
-#     metrics   = ['Jam Kerja/Hari','Rasio Kerja:Istirahat','Defisit Tidur (jam)']
-#     for level, color in [('Low','#64ffda'),('Moderate','#ffa500'),('High','#e94560')]:
-#         row = fe_num_data[fe_num_data['Level']==level].iloc[0]
-#         fig_fenum.add_trace(go.Bar(
-#             name=level, x=metrics,
-#             y=[row[m] for m in metrics],
-#             marker_color=color,
-#             text=[f"{row[m]:.1f}" for m in metrics],
-#             textposition='outside',
-#         ))
-#     fig_fenum.update_layout(
-#         barmode='group',
-#         title="Rata-rata Fitur Numerik per Burnout Level (pola monoton ✅)",
-#         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#         font_color='#ccd6f6', title_font_color='#e94560',
-#     )
-#     st.plotly_chart(fig_fenum, use_container_width=True)
-#     insight("📌 Semua fitur numerik baru menunjukkan pola <strong>monoton naik</strong> seiring level burnout: jam kerja/hari (10.4→12.2→13.8), rasio kerja:istirahat (1.7→2.6→3.6), defisit tidur (1.5→1.8→2.3 jam). Fitur engineering berhasil membedakan antar level secara visual ✅")
-
-#     # Dual Risk Flag per Level
-#     section("🔧 Feature Engineering — Dual Risk Flag per Level")
-#     fe_data = pd.DataFrame({
-#         'Level':          ['Low','Moderate','High'],
-#         '% Overwork':     [47.7, 86.0, 100.0],
-#         '% Sleep Risk':   [40.5, 51.3,  63.1],
-#         '% Dual Risk':    [18.8, 43.5,  63.1],
-#     })
-#     fig_fe = go.Figure()
-#     for col, color in [('% Overwork','#3498db'),('% Sleep Risk','#ffa500'),('% Dual Risk','#e94560')]:
-#         fig_fe.add_trace(go.Bar(name=col, x=fe_data['Level'], y=fe_data[col],
-#                                 marker_color=color, text=fe_data[col],
-#                                 texttemplate='%{text:.1f}%', textposition='outside'))
-#     fig_fe.update_layout(barmode='group', title="% Flag Aktif per Burnout Level",
-#                          paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                          font_color='#ccd6f6', title_font_color='#e94560', yaxis=dict(range=[0,120]))
-#     st.plotly_chart(fig_fe, use_container_width=True)
-#     insight("📌 <strong>Insight Feature Engineering:</strong> dual_risk_flag melonjak drastis: Low (18.8%) → Moderate (43.5%) → High (63.1%). Semua user High mengalami overwork (100%). dual_risk_flag adalah <strong>fitur biner dengan diskriminasi level terbaik</strong>.")
-
-# # ── 3. EDA NLP ──────────────────────────────────────────────────────
-# elif page == "💬 EDA — NLP Emosi":
-#     st.markdown('<div class="main-header"><h1>💬 EDA — Dataset NLP Emosi</h1><p>Analisis 33.162 data teks dari 4 sumber berbeda</p></div>', unsafe_allow_html=True)
-
-#     df_nlp, df_len = generate_nlp_data()
-
-#     # BQ-2: Kontribusi per sumber
-#     section("BQ-2 · Kontribusi Tiap Sumber Dataset")
-#     total_per_src = df_nlp.groupby('source')['count'].sum().reset_index()
-#     total_per_src['persen'] = (total_per_src['count']/total_per_src['count'].sum()*100).round(1)
-
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         fig = px.bar(total_per_src, x='source', y='count',
-#                      color='source', color_discrete_sequence=PALETTE,
-#                      title="Volume Data per Sumber", text='count')
-#         fig.update_traces(texttemplate='%{text:,}', textposition='outside')
-#         fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                           font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-#         st.plotly_chart(fig, use_container_width=True)
-#     with col2:
-#         fig2 = px.pie(total_per_src, names='source', values='count',
-#                       color_discrete_sequence=PALETTE, title="Proporsi per Sumber")
-#         fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                            font_color='#ccd6f6', title_font_color='#e94560')
-#         st.plotly_chart(fig2, use_container_width=True)
-
-#     insight("📌 <strong>BQ-2:</strong> English Archive mendominasi (58.1%, 19.281 baris). Dataset lokal Indonesia (Twitter+Ricco48+IndoNLU) = 41.9%. Dominasi English perlu diwaspadai agar model tidak bias ke bahasa Inggris.")
-
-#     # BQ-1: Distribusi emosi final
-#     section("BQ-1 · Distribusi Kelas Emosi — Dataset NLP Final")
-#     # Dari notebook rev: happy=30.28%, love=10.92%, rasio 2.77:1
-#     total_per_emo = df_nlp.groupby('emotion')['count'].sum().reset_index()
-#     total_per_emo['persen'] = (total_per_emo['count']/total_per_emo['count'].sum()*100).round(2)
-#     total_per_emo = total_per_emo.sort_values('count', ascending=False)
-
-#     col1, col2 = st.columns(2)
-#     with col1:
-#         fig = px.bar(total_per_emo, x='emotion', y='count',
-#                      color='emotion', color_discrete_map=COLORS,
-#                      title="Jumlah Data per Kelas Emosi", text='persen')
-#         fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
-#         fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                           font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-#         st.plotly_chart(fig, use_container_width=True)
-#     with col2:
-#         # Garis referensi 20% ideal
-#         fig2 = px.bar(total_per_emo, x='persen', y='emotion', orientation='h',
-#                       color='emotion', color_discrete_map=COLORS,
-#                       title="Proporsi (%) vs Distribusi Ideal (20%)")
-#         fig2.add_vline(x=20, line_dash="dash", line_color="gray",
-#                        annotation_text="Ideal 20%")
-#         fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                            font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-#         st.plotly_chart(fig2, use_container_width=True)
-
-#     insight("⚠️ <strong>BQ-1:</strong> 'happy' mendominasi (30.28%), 'love' paling sedikit (10.92%) → rasio imbalance <strong>2.77:1</strong>. Ini pengaruh English Archive yang happy-heavy, namun sudah diredam oleh 3 sumber Indonesia. Tergolong imbalance sedang → ditangani dengan class_weight='balanced' saat training.")
-
-#     # Heatmap sumber × emosi
-#     section("BQ-2 · Heatmap Distribusi Emosi × Sumber")
-#     pivot = df_nlp.pivot(index='source', columns='emotion', values='count').fillna(0)
-#     fig_h = px.imshow(pivot, color_continuous_scale='Viridis',
-#                       title="Distribusi Emosi per Sumber Dataset",
-#                       text_auto=True, aspect='auto')
-#     fig_h.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                         font_color='#ccd6f6', title_font_color='#e94560')
-#     st.plotly_chart(fig_h, use_container_width=True)
-
-#     # BQ-3: Panjang teks
-#     section("BQ-3 · Distribusi Panjang Teks per Emosi")
-#     fig_box = px.box(df_len, x='emotion', y='word_count',
-#                      color='emotion', color_discrete_map=COLORS,
-#                      title="Distribusi Jumlah Kata per Kelas Emosi",
-#                      category_orders={'emotion':['anger','fear','happy','love','sadness']})
-#     fig_box.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                           font_color='#ccd6f6', title_font_color='#e94560', showlegend=False)
-#     st.plotly_chart(fig_box, use_container_width=True)
-#     insight("📌 <strong>BQ-3:</strong> Median teks: 12–18 kata. P95 ≈ 25–30 kata → digunakan sebagai <strong>max_length tokenizer NLP</strong>. Teks 'sadness' cenderung lebih panjang, 'happy' lebih singkat.")
-
-# # ── 4. DATA SINTETIS ────────────────────────────────────────────────
-# elif page == "🧬 Data Sintetis":
-#     st.markdown('<div class="main-header"><h1>🧬 Data Sintetis — Time-Series LSTM</h1><p>Simulasi 30 hari per user • 1.065 anchor • 31.950 baris harian</p></div>', unsafe_allow_html=True)
-
-#     df_syn = generate_synthetic_data()
-
-#     # BQ-9: Pola burnout 30 hari
-#     section("BQ-9 · Tren Burnout — Melewati Threshold di Hari Ke Berapa?")
-
-#     # Rata-rata semua user per hari
-#     avg_per_day = df_syn.groupby('day')['burnout_score'].mean().reset_index()
-#     fig_trend = go.Figure()
-#     fig_trend.add_trace(go.Scatter(x=avg_per_day['day'], y=avg_per_day['burnout_score'],
-#                                    mode='lines+markers', name='Rata-rata semua user',
-#                                    line=dict(color='#e94560', width=2.5)))
-#     fig_trend.add_hline(y=36, line_dash="dash", line_color="#ffa500",
-#                         annotation_text="Threshold Moderate (36)")
-#     fig_trend.add_hline(y=66, line_dash="dash", line_color="#e94560",
-#                         annotation_text="Threshold High (66)")
-#     # Dari notebook rev: Moderate di hari ke-3, High di hari ke-21
-#     fig_trend.add_vline(x=3, line_dash="dot", line_color="#ffa500",
-#                         annotation_text="Hari ke-3 (Moderate)")
-#     fig_trend.add_vline(x=21, line_dash="dot", line_color="#e94560",
-#                         annotation_text="Hari ke-21 (High)")
-#     fig_trend.update_layout(title="Tren Rata-rata Burnout Score 30 Hari Simulasi",
-#                              xaxis_title="Hari ke-", yaxis_title="Burnout Score",
-#                              paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                              font_color='#ccd6f6', title_font_color='#e94560', height=400)
-#     st.plotly_chart(fig_trend, use_container_width=True)
-#     insight("📌 <strong>BQ-9:</strong> Burnout rata-rata melewati threshold <strong>Moderate (36) di hari ke-3</strong>, lalu melewati threshold <strong>High (66) di hari ke-21</strong>. Trigger notifikasi BurnoutLens: consecutive_overwork ≥ 3 hari → burnout naik +41.4 poin dari tanpa lembur.")
-
-#     # Pilih user individual
-#     section("BQ-9 · Profil Individual User (30 Hari)")
-#     users = df_syn['user_id'].unique()
-#     selected_users = st.multiselect("Pilih user:", users[:20], default=list(users[:3]))
-
-#     if selected_users:
-#         fig = go.Figure()
-#         color_map = px.colors.qualitative.Plotly
-#         for i, uid in enumerate(selected_users):
-#             u_df = df_syn[df_syn['user_id']==uid]
-#             fig.add_trace(go.Scatter(x=u_df['day'], y=u_df['burnout_score'],
-#                                      name=f"{uid}", line=dict(color=color_map[i%len(color_map)], width=2),
-#                                      mode='lines'))
-#             fig.add_trace(go.Scatter(x=u_df['day'], y=u_df['rolling_burnout_7d'],
-#                                      name=f"{uid} rolling 7d",
-#                                      line=dict(color=color_map[i%len(color_map)], width=2, dash='dot'),
-#                                      mode='lines', opacity=0.7))
-#         fig.add_hline(y=36, line_dash="dash", line_color="#ffa500")
-#         fig.add_hline(y=66, line_dash="dash", line_color="#e94560")
-#         fig.update_layout(title="Burnout Score Harian vs Rolling 7 Hari",
-#                           xaxis_title="Hari ke-", yaxis_title="Burnout Score",
-#                           paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                           font_color='#ccd6f6', title_font_color='#e94560', height=380)
-#         st.plotly_chart(fig, use_container_width=True)
-
-#     # Burnout vs consecutive overwork
-#     section("BQ-9 · Burnout Score vs Consecutive Overwork")
-#     avg_by_consec = df_syn.groupby('consecutive_overwork')['burnout_score'].mean().reset_index()
-#     avg_by_consec.columns = ['Consecutive Overwork','Rata-rata Burnout']
-#     fig2 = px.line(avg_by_consec, x='Consecutive Overwork', y='Rata-rata Burnout',
-#                    markers=True, title="Pengaruh Consecutive Overwork terhadap Burnout")
-#     fig2.add_vline(x=3, line_dash="dot", line_color="#e94560",
-#                    annotation_text="Trigger ≥3 hari")
-#     fig2.add_hline(y=36, line_dash="dash", line_color="#ffa500")
-#     fig2.add_hline(y=66, line_dash="dash", line_color="#e94560")
-#     fig2.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                        font_color='#ccd6f6', title_font_color='#e94560')
-#     st.plotly_chart(fig2, use_container_width=True)
-
-#     # BQ-10: Synthetic vs original
-#     section("BQ-10 · Distribusi Synthetic vs Data Asli")
-#     # Dari notebook rev: asli Low=87.75, Mod=12.21, High=0.04 | synthetic Low=30.7, Mod=29.3, High=40.0
-#     compare_df = pd.DataFrame({
-#         'Level':          ['Low','Moderate','High'],
-#         'Original (%)':   [87.75, 12.21, 0.04],
-#         'Synthetic (%)':  [30.7,  29.3,  40.0],
-#     })
-#     fig3 = go.Figure()
-#     fig3.add_trace(go.Bar(name='Original (%)', x=compare_df['Level'],
-#                           y=compare_df['Original (%)'], marker_color='#3498db',
-#                           text=compare_df['Original (%)'],
-#                           texttemplate='%{text:.2f}%', textposition='outside'))
-#     fig3.add_trace(go.Bar(name='Synthetic (%)', x=compare_df['Level'],
-#                           y=compare_df['Synthetic (%)'], marker_color='#e94560',
-#                           text=compare_df['Synthetic (%)'],
-#                           texttemplate='%{text:.1f}%', textposition='outside'))
-#     fig3.update_layout(barmode='group',
-#                        title="BQ-10: Perbandingan Distribusi Level — Original vs Synthetic",
-#                        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-#                        font_color='#ccd6f6', title_font_color='#e94560',
-#                        yaxis=dict(range=[0,110]))
-#     st.plotly_chart(fig3, use_container_width=True)
-#     insight("✅ <strong>BQ-10:</strong> Rasio imbalance dari 2.025:1 → ~1.4:1. Selisih mean burnout: Low→Moderate +32.1 poin, Moderate→High +21.3 poin. Distribusi terbedakan jelas per level — synthetic berhasil merepresentasikan karakteristik anchor ✅")
-
 # ── 5. A/B TESTING ──────────────────────────────────────────────────
 elif page == "⚔️ A/B Testing":
     st.markdown('<div class="main-header"><h1>⚔️ A/B Testing — Strategi Threshold</h1><p>Versi A (Konservatif ≥66) vs Versi B (Agresif ≥36)</p></div>', unsafe_allow_html=True)
@@ -887,7 +549,8 @@ elif page == "⚔️ A/B Testing":
                       title="Perbandingan Metrik: Versi A vs Versi B",
                       paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                       font_color='#ccd6f6', title_font_color='#e94560')
-    st.plotly_chart(fig, use_container_width=True)
+    # st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, key="ab_chart_1")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -904,7 +567,8 @@ elif page == "⚔️ A/B Testing":
                            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                            font_color='#ccd6f6', title_font_color='#e94560',
                            xaxis=dict(range=[-0.02,0.15]), yaxis=dict(range=[0,1.1]))
-        st.plotly_chart(fig2, use_container_width=True)
+        # st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, use_container_width=True, key="ab_chart_2")
 
     with col2:
         # User-level detection — dari notebook rev: 916 user berisiko, A=782 (85.4%), B=916 (100%)
@@ -924,7 +588,8 @@ elif page == "⚔️ A/B Testing":
                            title="User-Level Detection (dari 916 user berisiko)",
                            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                            font_color='#ccd6f6', title_font_color='#e94560')
-        st.plotly_chart(fig3, use_container_width=True)
+        # st.plotly_chart(fig3, use_container_width=True)
+        st.plotly_chart(fig3, use_container_width=True, key="ab_chart_3")
 
     section("✅ Rekomendasi Final")
     st.success("""
@@ -1000,7 +665,8 @@ elif page == "🔮 Simulasi Prediksi":
         ))
         fig_gauge.update_layout(paper_bgcolor='rgba(0,0,0,0)', font_color='#ccd6f6',
                                  height=300, margin=dict(t=60,b=20,l=20,r=20))
-        st.plotly_chart(fig_gauge, use_container_width=True)
+        # st.plotly_chart(fig_gauge, use_container_width=True)
+        st.plotly_chart(fig_gauge, use_container_width=True, key="simulasi_gauge")
 
         if level == "High":
             st.error("🚨 **Risiko Tinggi!** Segera kurangi beban kerja dan pertimbangkan konsultasi ke profesional.")
