@@ -131,18 +131,32 @@ function normalizeJournalResponse(raw: unknown): Journal | null {
     }
   }
 
-  let detectedEmotion = 'Netral'
+  let detectedEmotion = 'neutral'
   if (typeof mood === 'string') {
-    const m = mood.toLowerCase()
-    if (m === 'anger') detectedEmotion = 'Marah'
-    else if (m === 'fear') detectedEmotion = 'Cemas'
-    else if (m === 'happy' || m === 'love') detectedEmotion = 'Senang'
-    else if (m === 'sadness') detectedEmotion = 'Sedih'
-    else if (m === 'neutral') detectedEmotion = 'Netral'
-    else {
-      detectedEmotion = mood.charAt(0).toUpperCase() + mood.slice(1)
+    const m = mood.toLowerCase().trim()
+    const emotionAlias: Record<string, string> = {
+      anger: 'anger',
+      marah: 'anger',
+  
+      fear: 'fear',
+      cemas: 'fear',
+      takut: 'fear',
+  
+      happy: 'happy',
+      senang: 'happy',
+      bahagia: 'happy',
+  
+      love: 'love',
+  
+      sadness: 'sadness',
+      sedih: 'sadness',
+  
+      neutral: 'neutral',
+      netral: 'neutral',
     }
-  }
+  
+    detectedEmotion = emotionAlias[m] ?? m
+    }
 
   let insight = typeof r.insight === 'string' ? r.insight : undefined
   let recommendation = typeof r.recommendation === 'string' ? r.recommendation : undefined
