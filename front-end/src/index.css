@@ -37,6 +37,31 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+.mood-anger {
+  background-color: #ffd6d6;
+  color: #8b0000;
+}
+
+.mood-happy {
+  background-color: #ffef9f;
+  color: #5f4100;
+}
+
+.mood-sadness {
+  background-color: #dbeafe;
+  color: #1e3a8a;
+}
+
+.mood-love {
+  background-color: #fbcfe8;
+  color: #831843;
+}
+
+.mood-fear {
+  background-color: #e9d5ff;
+  color: #581c87;
+}
+
 .mood-tenang { background-color: #e3cffd; color: #4f4065; }
 .mood-bahagia { background-color: #ffdeaa; color: #5f4100; }
 .mood-cemas { background-color: #ffdad6; color: #93000a; }
