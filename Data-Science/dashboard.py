@@ -380,7 +380,7 @@ elif page == "❓ Business Questions":
         )
         insight("📌 <strong>Insight BQ-5:</strong> Tiga fitur jam kerja paling dominan: work_hours_per_day (+0.492), overwork_flag (+0.394), work_rest_ratio (+0.361). Beban kerja adalah prediktor burnout yang dominan.")
 
-     with st.expander("**BQ-6 · Rata-rata jam kerja, tidur, burnout berbeda antar level — seberapa besar?**"):
+     with st.expander("**BQ-6 · Bagaimana rata-rata jam kerja, jam tidur, dan burnout score berbeda antar level burnout dan seberapa besar selisihnya? **"):
         bq6_data = pd.DataFrame({
             'Level': ['Low','Moderate','High'],
             'Jam Kerja/Minggu': [52.06, 60.84, 69.12],
