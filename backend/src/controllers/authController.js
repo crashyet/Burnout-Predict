@@ -24,7 +24,7 @@ const register = async (req, res) => {
     
     // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000 + 7 * 60 * 60 * 1000); // 5 minutes (WIB/UTC+7)
 
     // Insert user
     await db.query(sql`
@@ -133,7 +133,7 @@ const resendOTP = async (req, res) => {
 
     // Generate new randomized 6 digit OTP
     const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000 + 7 * 60 * 60 * 1000); // 5 minutes (WIB/UTC+7)
 
     // Update user record
     await db.query(sql`
@@ -192,7 +192,7 @@ const login = async (req, res) => {
     if (!user.is_verified) {
       // Generate new randomized 6 digit OTP
       const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-      const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+      const otpExpiry = new Date(Date.now() + 5 * 60 * 1000 + 7 * 60 * 60 * 1000); // 5 minutes (WIB/UTC+7)
 
       // Update user record
       await db.query(sql`
