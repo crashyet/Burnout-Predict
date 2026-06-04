@@ -290,3 +290,7 @@ export async function getJournals(dateStr?: string): Promise<Journal[]> {
     return []
   }
 }
+
+// ─── Re-export useful helpers so pages need only this service ─────────────────
+
+export { analyzeJournalText, getLocalDateString }
