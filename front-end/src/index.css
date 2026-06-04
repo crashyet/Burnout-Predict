@@ -1,4 +1,4 @@
-﻿@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 
 @tailwind base;
@@ -37,6 +37,7 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+
 .mood-anger {
   background-color: #ffd6d6;
   color: #8b0000;
@@ -62,12 +63,6 @@ body {
   color: #581c87;
 }
 
-.mood-tenang { background-color: #e3cffd; color: #4f4065; }
-.mood-bahagia { background-color: #ffdeaa; color: #5f4100; }
-.mood-cemas { background-color: #ffdad6; color: #93000a; }
-.mood-lelah { background-color: #dce9ff; color: #00256c; }
-.mood-stres { background-color: #ba1a1a; color: #ffffff; }
-.mood-sedih { background-color: #cbdbf5; color: #0b1c30; }
 
 .calendar-grid-mini {
   display: grid;
